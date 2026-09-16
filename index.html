@@ -997,13 +997,14 @@ let PHOTOS = { lina:null, ilyes:null };
 let SRS = {};                       // mémoire d'apprentissage : quand revoir chaque mot
 let WALLET = { lina:null, ilyes:null };   // cagnotte : solde + mouvements
 let TASKS  = { lina:[], ilyes:[] };       // tâches données par les parents
-let REWARD = { amount:5, minQ:20, minPct:70, cur:'DH' };
+let REWARD = { amount:5, minQ:20, minPct:70, cur:'DH', exam:{ n:20, b:[[90,20],[75,15],[60,10]] } };
 const todayKey = () => { const n = new Date();
   return new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 const money = n => (Math.round(n*100)/100) + ' ' + REWARD.cur;
 
 async function loadMoney(){
   REWARD = Object.assign({ amount:5, minQ:20, minPct:70, cur:'DH' }, (await store.get(K.reward())) || {});
+  REWARD.exam = Object.assign({ n:20, b:[[90,20],[75,15],[60,10]] }, REWARD.exam || {});
   for(const k of ['lina','ilyes']){
     WALLET[k] = (await store.get(K.wallet(k))) || { balance:0, tx:[] };
     TASKS[k]  = (await store.get(K.tasks(k)))  || [];
@@ -1066,6 +1067,147 @@ async function loadProgress(kid){
   progress = (await store.get(K.prog(kid))) || {};
   SRS = (await store.get(K.srs(kid))) || {};
 }
+/* ---- intelligence artificielle : analyse et création de chapitres ----
+   La clé reste sur CET appareil (jamais envoyée au serveur de synchro). */
+let AI = { provider:'claude', key:'', model:'' };
+function loadAI(){
+  try{ const r = localStorage.getItem('cahier-ai'); if(r) AI = Object.assign(AI, JSON.parse(r)); }catch(e){}
+}
+function saveAI(o){ AI = Object.assign({provider:'claude', key:'', model:''}, o);
+  try{ localStorage.setItem('cahier-ai', JSON.stringify(AI)); }catch(e){} }
+const AI_DEFAULT = { claude:'claude-sonnet-5', openai:'gpt-4o-mini' };
+
+async function askAI(system, prompt, maxTokens){
+  if(!AI.key) throw new Error("Aucune clé API enregistrée sur cet appareil.");
+  const model = AI.model || AI_DEFAULT[AI.provider];
+  if(AI.provider === 'openai'){
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method:'POST',
+      headers:{ 'content-type':'application/json', 'authorization':'Bearer '+AI.key },
+      body: JSON.stringify({ model, messages:[{role:'system',content:system},{role:'user',content:prompt}] })
+    });
+    if(!r.ok) throw new Error('OpenAI ' + r.status + ' ' + (await r.text()).slice(0,160));
+    const j = await r.json();
+    return j.choices[0].message.content;
+  }
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{ 'content-type':'application/json', 'x-api-key':AI.key,
+              'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+    body: JSON.stringify({ model, max_tokens: maxTokens||4000, system,
+                           messages:[{ role:'user', content: prompt }] })
+  });
+  if(!r.ok) throw new Error('Claude ' + r.status + ' ' + (await r.text()).slice(0,160));
+  const j = await r.json();
+  return (j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+}
+
+/* le bilan de l'enfant, en texte compact, pour l'IA */
+async function bilanTexte(kid){
+  const prog = (await store.get(K.prog(kid))) || {};
+  const hist = ((await store.get(K.hist(kid))) || []).slice(-15);
+  const noms = {};
+  allSets(kid).forEach(x => noms[x.st.id] = x.su + ' / ' + x.st.title);
+  let t = "Enfant : " + DATA[kid].name + " (" + DATA[kid].year + ", école anglaise au Maroc, francophone).\n\nChapitres :\n";
+  Object.keys(prog).forEach(id => {
+    const p = prog[id];
+    t += "- " + (noms[id]||id) + " : meilleur " + p.best + "/" + p.total + " (" + Math.round(100*p.best/p.total) + "%), " + (p.tries||1) + " essai(s)\n";
+  });
+  t += "\nDernières séances et questions ratées :\n";
+  hist.forEach(h => {
+    t += "- " + h.d + " " + (h.title||h.set) + " : " + h.score + "/" + h.total;
+    if(h.w && h.w.length) t += " — raté : " + h.w.join(' ; ');
+    t += "\n";
+  });
+  return t;
+}
+
+/* ---- l'examen : un tirage dans TOUTES les matières ---- */
+const melange = a => a.slice().sort(()=>Math.random()-0.5);
+function toutesLesQuestions(kid){
+  const out = [];
+  const subs = DATA[kid].subjects.map(su=>({ name:su.name, sets:su.sets }))
+                 .concat([{ name:'Mes chapitres', sets: CUSTOM[kid] || [] }]);
+  subs.forEach(su => su.sets.forEach(st => {
+    if(st.learn) return;
+    st.qs.forEach(q => out.push({ q, su: su.name }));
+  }));
+  return out;
+}
+function buildExam(kid, n){
+  const all = toutesLesQuestions(kid);
+  if(!all.length) return [];
+  const par = {};
+  all.forEach(x => (par[x.su] = par[x.su] || []).push(x));
+  const mats = Object.keys(par);
+  const quota = Math.max(1, Math.floor(n / mats.length));
+  let pick = [];
+  mats.forEach(m => { pick = pick.concat(melange(par[m]).slice(0, quota)); });
+  if(pick.length < n){
+    const reste = melange(all).filter(x => pick.indexOf(x) < 0);
+    pick = pick.concat(reste.slice(0, n - pick.length));
+  }
+  return melange(pick).slice(0, n).map(x => { const c = Object.assign({}, x.q, { _su: x.su }); delete c.step; delete c._k; return c; });
+}
+function examPaidToday(kid){
+  return ((WALLET[kid] && WALLET[kid].tx) || []).some(t => t.d === todayKey() && t.kind === 'exam');
+}
+
+/* l'écran d'annonce : ce qui attend l'enfant, et par quoi il commence */
+function examBrief(kid){
+  const v = DATA[kid];
+  const qs = buildExam(kid, REWARD.exam.n);
+  if(!qs.length){ alert("Il n'y a pas encore assez de chapitres pour un examen."); return; }
+  const par = {};
+  qs.forEach(q => (par[q._su] = par[q._su] || []).push(q));
+  const mats = Object.keys(par);
+  const deja = examPaidToday(kid);
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← ${T("Subjects","Matières")}</button>
+    <span class="who" style="background:#7C3AED">${T("The big test","Le grand examen")}</span></div>
+
+  <div class="card" style="padding:20px 18px; text-align:center; border-color:#7C3AED;">
+    <div style="font-size:40px;">📝</div>
+    <h2 style="font-size:24px; color:#6D28D9;">${qs.length} ${T("questions","questions")}</h2>
+    <p style="font-size:13.5px; margin:4px 0 0;">${T("One answer per question. No second chance — take your time!","Une seule réponse par question. Pas de deuxième chance : prends ton temps !")}</p>
+  </div>
+
+  <h3 style="font-family:'Baloo 2',sans-serif; font-size:19px; margin:18px 0 8px;">${T("What is in the test","Ce qu'il y a dans l'examen")}</h3>
+  ${mats.map(m=>`<div class="task" style="box-shadow:none;">
+      <span style="font-size:24px;">${subIcon(m)}</span>
+      <span class="ti">${m}</span>
+      <span class="pay" style="color:#6D28D9">${par[m].length} ${T("questions","questions")}</span>
+    </div>`).join('')}
+
+  <div class="card" style="padding:14px 16px; margin-top:12px; background:#FFFBEB; border-color:#E08A00;">
+    <h3 style="font-size:15px; color:#B45309;">${T("The reward","La récompense")}</h3>
+    <p style="font-size:13.5px; margin:2px 0 0;">${REWARD.exam.b.map(x=>`<b>${x[0]}%</b> → ${money(x[1])}`).join(' &nbsp;·&nbsp; ')}</p>
+    <p style="font-size:12px; color:var(--ink-soft); margin:4px 0 0;">
+      ${deja ? T("Today's reward has already been earned — this one is for practice.","La récompense du jour a déjà été gagnée — celui-ci est pour t'entraîner.")
+             : T("Paid once a day.","Versée une fois par jour.")}</p>
+  </div>
+
+  <h3 style="font-family:'Baloo 2',sans-serif; font-size:19px; margin:20px 0 8px;">${T("Where do you want to start?","Par quoi veux-tu commencer ?")}</h3>
+  ${mats.map((m,i)=>`<button class="cta" data-start="${i}" style="background:${v.hex}; margin-bottom:10px;">
+      ${subIcon(m)} ${m} <span style="font-size:15px; opacity:.85">(${par[m].length})</span></button>`).join('')}
+  <button class="cta ghost" data-start="-1">🔀 ${T("Mix everything","Tout mélanger")}</button>`;
+
+  document.getElementById('bk').onclick = ()=>menu(kid);
+  document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{
+    const i = +b.dataset.start;
+    let ordre;
+    if(i < 0) ordre = melange(qs);
+    else {
+      const first = mats[i];
+      ordre = melange(par[first]).concat(
+        mats.filter(m=>m!==first).reduce((acc,m)=>acc.concat(melange(par[m])), []));
+    }
+    S.set = { id:'exam', exam:true, title:T("The big test","Le grand examen"), qs:ordre };
+    S.i=0; S.score=0; S.tries=0; S.picked=null; S.log=[];
+    question();
+  });
+}
+
 /* ---- entraînement quotidien : nouveaux mots + révisions espacées ---- */
 const hashQ = t => { let h = 5381; const x = (t||'').replace(/<[^>]+>/g,''); 
   for(let i=0;i<x.length;i++) h = ((h*33) ^ x.charCodeAt(i)) >>> 0; return h.toString(36); };
@@ -1190,6 +1332,7 @@ async function menu(kid){
   const w = WALLET[kid] || { balance:0, tx:[] };
   const dw = await dayWork(kid);
   const todo = (TASKS[kid]||[]).filter(t => t.status === 'todo');
+  const examPaid = examPaidToday(kid);
   // on range chaque chapitre ajouté dans SA matière ; le reste va dans « My chapters »
   const subs = v.subjects.map(su => Object.assign({}, su, { sets: su.sets.slice() }));
   const norm = t => (t||'').toLowerCase().replace(/[^a-z]/g,'');
@@ -1275,9 +1418,22 @@ async function menu(kid){
     <span style="font-size:22px; color:#E08A00">›</span>
   </button>
   ${subs.map(card).join('')}
+  <button class="card subcard" id="exam" style="border-color:#7C3AED">
+    <span class="ic" style="background:#7C3AED">📝</span>
+    <span class="bd">
+      <span class="ti">${T("The big test","Le grand examen")}</span>
+      <span class="st">${T("All subjects mixed, one answer per question","Toutes les matières mélangées, une seule réponse par question")}</span>
+      <span class="st">${REWARD.exam.n} questions · ${REWARD.exam.b.map(x=>x[0]+'% → '+x[1]+' '+REWARD.cur).join(' · ')}</span>
+      <span class="msg" style="color:${examPaid?'var(--green)':'#7C3AED'}">
+        ${examPaid ? T("Today's test is done — you can still practise.","L'examen du jour est passé — tu peux refaire pour t'entraîner.")
+                   : T("Ready? The reward depends on your score!","Prêt ? La récompense dépend de ton score !")}</span>
+    </span>
+    <span style="font-size:22px; color:#7C3AED">›</span>
+  </button>
   <p class="foot">${T("Pick a subject, then a chapter.","Choisis une matière, puis un chapitre.")}</p>`;
   document.getElementById('bk').onclick = home;
   document.getElementById('wal').onclick = ()=>walletView(kid);
+  document.getElementById('exam').onclick = ()=>examBrief(kid);
   document.querySelectorAll('[data-su]').forEach(b=>b.onclick=()=>subjectView(kid, +b.dataset.su, subs));
 }
 
@@ -1409,7 +1565,7 @@ function question(){
   </div>
   <div class="prog"><i style="width:${pct}%; background:${v.hex}"></i></div>
   <div class="card qcard">
-    <div class="qmeta">Question ${S.i+1} of ${st.qs.length}</div>
+    <div class="qmeta">${q._su ? subIcon(q._su)+' '+q._su+' · ' : ''}Question ${S.i+1} of ${st.qs.length}</div>
     <div class="q">${T(q.q, q.fr)}</div>
     ${q.say && canSpeak ? `<button class="speak" id="qsay" style="margin-top:10px;">🔊 ${T("Listen","Écouter")}</button><div id="qwarn"></div>` : ''}
     ${q.t==='sentence'?`<div class="qhelp">${T("Rewrite the whole sentence with the capital letters and the punctuation.","Réécris la phrase entière, avec les majuscules et la ponctuation.")}</div>`:''}
@@ -1781,6 +1937,13 @@ async function results(){
   const pct = score/total;
   const strip = t => (t||'').toString().replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
   if(st.daily) await store.set(K.srs(S.kid), SRS);
+  let prime = 0, primeDeja = false;
+  if(st.exam){
+    const p100 = Math.round(100*score/total);
+    for(const [seuil, montant] of REWARD.exam.b){ if(p100 >= seuil){ prime = montant; break; } }
+    primeDeja = examPaidToday(S.kid);
+    if(prime > 0 && !primeDeja) await credit(S.kid, "Examen — " + p100 + "%", prime, 'exam');
+  }
   const gagne = await checkDailyReward(S.kid);
   await saveResult(S.kid, st.id, st.title, score, total,
     S.log.filter(l=>!l.ok).map(l=>strip(l.q)),
@@ -1799,6 +1962,14 @@ async function results(){
   app.innerHTML = `
   <div class="bar"><button class="back" id="bk">← Chapters</button>
   <span class="who" style="background:${v.hex}">${st.title}</span></div>
+  ${st.exam?`<div class="card" style="padding:18px; text-align:center; border-color:#7C3AED; background:#F5F3FF; margin-bottom:14px;">
+      <div style="font-size:34px;">${prime>0?'🏆':'📝'}</div>
+      <div style="font-family:'Baloo 2',sans-serif; font-size:21px; color:#6D28D9;">
+        ${prime>0 ? (primeDeja ? T("Well done! (today's test reward was already earned)","Bravo ! (la récompense de l'examen du jour a déjà été versée)")
+                               : T("Test reward:","Récompense de l'examen :")+' +'+money(prime))
+                  : T("No reward this time — try again tomorrow!","Pas de récompense cette fois — retente demain !")}</div>
+      <div style="font-size:12.5px; color:var(--ink-soft); margin-top:4px;">
+        ${REWARD.exam.b.map(x=>x[0]+'% → '+x[1]+' '+REWARD.cur).join(' · ')}</div></div>`:''}
   ${gagne?`<div class="card" style="padding:16px; text-align:center; border-color:#E08A00; background:#FFFBEB; margin-bottom:14px;">
       <div style="font-size:34px;">🎉💰</div>
       <div style="font-family:'Baloo 2',sans-serif; font-size:21px; color:#B45309;">${T("Reward earned!","Récompense gagnée !")} +${money(REWARD.amount)}</div>
@@ -1819,7 +1990,7 @@ async function results(){
 }
 
 /* ============================================================ ESPACE PARENT */
-const VERSION = 'v26 · envoi immédiat et journal';
+const VERSION = 'v29 · examen annoncé par matière';
 const KIDS = ['lina','ilyes'];
 const dayKey = d => { const z=new Date(d); return new Date(z.getTime()-z.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 const frDate = iso => new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
@@ -1913,6 +2084,7 @@ async function parents(){
         <button class="tool" data-money="${kid}" style="border-color:#E08A00; color:#B45309">💰 Cagnotte et tâches${(TASKS[kid]||[]).filter(t=>t.status==='pending').length?' · '+(TASKS[kid]||[]).filter(t=>t.status==='pending').length+' à valider':''}</button>
         <button class="tool" data-add="${kid}" style="border-color:${v.hex}; color:${v.hex}">➕ Écrire un chapitre</button>
         <button class="tool" data-imp="${kid}" style="border-color:${v.hex}; color:${v.hex}">📥 Importer un chapitre</button>
+        <button class="tool" data-ai="${kid}" style="border-color:#7C3AED; color:#6D28D9">🤖 Assistant IA</button>
         <button class="tool" data-photo="${kid}">📷 ${PHOTOS[kid]?'Changer la photo de '+v.name:'Ajouter la photo de '+v.name}</button>
         ${PHOTOS[kid]?`<button class="tool" data-nophoto="${kid}">Retirer</button>`:''}
         <button class="tool" data-reset="${kid}">Effacer la progression</button>
@@ -2067,6 +2239,7 @@ async function parents(){
   document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>editor(b.dataset.add));
   document.querySelectorAll('[data-imp]').forEach(b=>b.onclick=()=>importer(b.dataset.imp));
   document.querySelectorAll('[data-money]').forEach(b=>b.onclick=()=>moneyView(b.dataset.money));
+  document.querySelectorAll('[data-ai]').forEach(b=>b.onclick=()=>aiView(b.dataset.ai));
   document.querySelectorAll('[data-sess]').forEach(b=>b.onclick=()=>{
     const [kid, ts] = b.dataset.sess.split('|'); session(kid, +ts);
   });
@@ -2111,6 +2284,121 @@ async function parents(){
     if(!confirm("Supprimer ce chapitre ?")) return;
     CUSTOM[kid] = CUSTOM[kid].filter(x=>x.id!==id); await saveCustom(kid); parents();
   });
+}
+
+/* ---------------- assistant IA, côté parent ---------------- */
+async function aiView(kid){
+  const v = DATA[kid];
+  loadAI();
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Espace parent</button>
+    <span class="who" style="background:#7C3AED">Assistant IA · ${v.name}</span></div>
+
+  <div class="card" style="padding:16px;">
+    <h3 style="font-size:16px;">La clé API</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;">Elle reste sur cet appareil et n'est jamais envoyée au serveur de synchronisation. Utilise une clé dédiée, avec un plafond de dépense.</p>
+    <div class="field"><label>Fournisseur</label>
+      <select id="ai-p"><option value="claude">Claude (Anthropic)</option><option value="openai">ChatGPT (OpenAI)</option></select></div>
+    <div class="field"><label>Clé API</label><input id="ai-k" value="${AI.key||''}" placeholder="sk-..."></div>
+    <div class="field"><label>Modèle (facultatif)</label><input id="ai-m" value="${AI.model||''}" placeholder="${AI_DEFAULT[AI.provider||'claude']}"></div>
+    <button class="tool on" id="ai-save">Enregistrer</button>
+  </div>
+
+  <div class="card" style="padding:16px; margin-top:14px; border-color:#7C3AED;">
+    <h3 style="font-size:16px; color:#6D28D9;">🔎 Analyser les résultats de ${v.name}</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 8px;">L'IA lit les scores et les questions ratées, puis propose un plan de travail.</p>
+    <button class="cta" id="ai-an" style="background:#7C3AED">Lancer l'analyse</button>
+    <div id="ai-out" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card" style="padding:16px; margin-top:14px;">
+    <h3 style="font-size:16px;">✨ Créer un nouveau chapitre</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;">Des questions inédites, écrites pour ${v.name}, avec les explications en français.</p>
+    <div class="field"><label>Matière</label>
+      <select id="g-su"><option>Maths</option><option>English</option><option>العربية — Arabic</option><option>Science</option><option>French</option></select></div>
+    <div class="field"><label>Thème précis</label><input id="g-th" placeholder="les fractions équivalentes / le present perfect / les nombres en arabe"></div>
+    <div class="field"><label>Nombre de questions</label><input id="g-n" value="12" inputmode="numeric"></div>
+    <div class="field"><label>Précisions (facultatif)</label><input id="g-x" placeholder="il confond encore les signes négatifs"></div>
+    <button class="cta" id="g-go" style="background:${v.hex}">Générer le chapitre</button>
+    <div id="g-out" style="margin-top:12px;"></div>
+  </div>`;
+
+  document.getElementById('bk').onclick = parents;
+  document.getElementById('ai-p').value = AI.provider || 'claude';
+  document.getElementById('ai-save').onclick = ()=>{
+    saveAI({ provider: document.getElementById('ai-p').value,
+             key: document.getElementById('ai-k').value.trim(),
+             model: document.getElementById('ai-m').value.trim() });
+    alert("Enregistré sur cet appareil.");
+    aiView(kid);
+  };
+
+  document.getElementById('ai-an').onclick = async ()=>{
+    const out = document.getElementById('ai-out'), btn = document.getElementById('ai-an');
+    btn.textContent = "L'IA réfléchit…"; out.innerHTML = '';
+    try{
+      const bilan = await bilanTexte(kid);
+      const txt = await askAI(
+        "Tu es un professeur particulier expérimenté qui conseille un parent. Réponds en français, de façon concrète et brève. Pas de flatterie inutile : dis clairement ce qui ne va pas.",
+        "Voici le bilan d'un enfant sur une application de révision. Donne : 1) ce qui est acquis, 2) les deux ou trois vraies faiblesses avec la nature exacte de l'erreur, 3) un plan pour la semaine (quel chapitre refaire, quoi travailler avec lui), 4) une idée d'exercice à faire à l'oral pendant le trajet. Maximum 300 mots.\n\n" + bilan);
+      out.innerHTML = `<div class="card" style="padding:14px; background:#F5F3FF; border-color:#7C3AED;">
+        <div style="font-size:13.5px; white-space:pre-wrap; line-height:1.55;">${txt.replace(/</g,'&lt;')}</div></div>`;
+    }catch(e){
+      out.innerHTML = `<div class="fb no"><span class="mark">${cross()}</span><span><h3>Échec</h3><p>${(e.message||e).toString().replace(/</g,'&lt;')}</p></span></div>`;
+    }
+    btn.textContent = "Lancer l'analyse";
+  };
+
+  document.getElementById('g-go').onclick = async ()=>{
+    const out = document.getElementById('g-out'), btn = document.getElementById('g-go');
+    const su = document.getElementById('g-su').value;
+    const th = document.getElementById('g-th').value.trim();
+    const n  = parseInt(document.getElementById('g-n').value,10) || 12;
+    const x  = document.getElementById('g-x').value.trim();
+    if(!th){ alert("Indique le thème."); return; }
+    btn.textContent = "Génération…"; out.innerHTML = '';
+    try{
+      const schema = '{"subject":"'+su+'","title":"titre en anglais","titleFr":"titre en français","sub":"sous-titre anglais","subFr":"sous-titre français","qs":[{"t":"num|text|choice","q":"énoncé (anglais si matière English, sinon français)","fr":"traduction française si l\'énoncé est en anglais","a":"nombre si t=num, tableau de réponses acceptées si t=text, index de la bonne réponse si t=choice","c":["propositions si t=choice"],"e":"explication en français","say":"mot à prononcer (facultatif)","lang":"en-GB ou ar-SA"}]}';
+      const txt = await askAI(
+        "Tu écris des exercices pour un enfant. Tu réponds UNIQUEMENT avec du JSON valide, sans texte autour, sans balises de code.",
+        "Crée un chapitre d'exercices de " + n + " questions sur : " + th + " (matière : " + su + ").\n" +
+        "Élève : " + DATA[kid].name + ", " + DATA[kid].year + ", scolarisé en anglais au Maroc, de langue maternelle française.\n" +
+        (x ? "À prendre en compte : " + x + "\n" : "") +
+        "Règles : les explications sont TOUJOURS en français et expliquent la règle, pas seulement la réponse. Varie les types (num, text, choice). Pour choice, donne 3 ou 4 propositions plausibles et l'index de la bonne (0 = la première). Pour text, liste toutes les réponses acceptables en minuscules.\n" +
+        "Réponds avec exactement cette structure JSON : " + schema, 8000);
+      const clean = txt.trim().replace(/^```(json)?/,'').replace(/```$/,'').trim();
+      const obj = JSON.parse(clean);
+      checkChapter(obj);
+      const sol = q => q.t==='choice' ? q.c[q.a] : (q.t==='num' ? String(q.a) : q.a.join(' / '));
+      out.innerHTML = `<div class="card" style="padding:14px;">
+        <h3 style="font-size:16px; color:${v.hex}">${obj.title}</h3>
+        <div style="font-size:12.5px; color:var(--ink-soft)">${obj.titleFr||''} · ${obj.qs.length} questions</div>
+        ${obj.qs.map((q,i)=>`<div style="padding:8px 0; border-bottom:1px dotted #DDD8C8;">
+          <div style="font-size:13.5px; font-weight:700;">${i+1}. ${q.q}</div>
+          ${q.c?`<div style="font-size:12.5px;">${q.c.join(' · ')}</div>`:''}
+          <div style="font-size:12.5px;">Réponse : <b style="color:var(--green)">${sol(q)}</b></div>
+          ${q.e?`<div style="font-size:12px; color:var(--ink-soft)">${q.e}</div>`:''}</div>`).join('')}
+        <button class="cta" id="g-add" style="background:${v.hex}; margin-top:12px;">Ajouter chez ${v.name}</button>
+        <button class="cta ghost" id="g-dl">Télécharger le fichier .json</button></div>`;
+      document.getElementById('g-add').onclick = async ()=>{
+        obj.id = 'p-'+Date.now(); obj.custom = true; obj.subject = obj.subject || su;
+        obj.sub = obj.sub || su;
+        CUSTOM[kid].push(obj); await saveCustom(kid);
+        alert("Ajouté chez " + v.name + " !"); parents();
+      };
+      document.getElementById('g-dl').onclick = ()=>{
+        const b = new Blob([JSON.stringify(obj,null,1)], {type:'application/json'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+        a.download = 'chapitre-' + (obj.title||'nouveau').toLowerCase().replace(/[^a-z0-9]+/g,'-') + '.json';
+        document.body.appendChild(a); a.click(); a.remove();
+      };
+    }catch(e){
+      out.innerHTML = `<div class="fb no"><span class="mark">${cross()}</span><span><h3>Échec</h3>
+        <p>${(e.message||e).toString().replace(/</g,'&lt;')}</p>
+        <p style="font-size:12px;">Si l'IA a renvoyé du texte au lieu du JSON attendu, relance : elle réussit en général au deuxième essai.</p></span></div>`;
+    }
+    btn.textContent = "Générer le chapitre";
+  };
 }
 
 /* ---------------- cagnotte et tâches, côté parent ---------------- */
@@ -2169,6 +2457,18 @@ async function moneyView(kid){
     <button class="tool on" id="r-save">Enregistrer</button>
   </div>
 
+  <div class="card" style="padding:16px; margin-top:14px; border-color:#7C3AED;">
+    <h3 style="font-size:16px; color:#6D28D9;">📝 Le grand examen</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;">Un tirage au hasard dans toutes les matières de l'enfant. La récompense dépend du score, une seule fois par jour ; les fois suivantes servent d'entraînement.</p>
+    <div class="two">
+      <div class="field"><label>Nombre de questions</label><input id="x-n" value="${REWARD.exam.n}" inputmode="numeric"></div>
+      <div class="field"><label>À partir de 90 %</label><input id="x-1" value="${REWARD.exam.b[0][1]}" inputmode="decimal"></div>
+      <div class="field"><label>À partir de 75 %</label><input id="x-2" value="${REWARD.exam.b[1][1]}" inputmode="decimal"></div>
+      <div class="field"><label>À partir de 60 %</label><input id="x-3" value="${REWARD.exam.b[2][1]}" inputmode="decimal"></div>
+    </div>
+    <button class="tool on" id="x-save">Enregistrer</button>
+  </div>
+
   <div class="card" style="padding:16px; margin-top:14px;">
     <h3 style="font-size:16px;">Tous les mouvements</h3>
     ${(w.tx||[]).slice().reverse().map(t=>`<div style="display:flex; gap:8px; padding:7px 2px; border-bottom:1px dotted #DDD8C8; font-size:13.5px;">
@@ -2212,6 +2512,14 @@ async function moneyView(kid){
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async ()=>{
     TASKS[kid] = TASKS[kid].filter(x=>x.id!==b.dataset.del); await saveTasks(kid); moneyView(kid);
   });
+  document.getElementById('x-save').onclick = async ()=>{
+    const n = parseInt(document.getElementById('x-n').value,10);
+    const a1 = parseFloat((document.getElementById('x-1').value||'').replace(',','.'));
+    const a2 = parseFloat((document.getElementById('x-2').value||'').replace(',','.'));
+    const a3 = parseFloat((document.getElementById('x-3').value||'').replace(',','.'));
+    REWARD.exam = { n: (n>0?n:20), b: [[90, a1>=0?a1:20], [75, a2>=0?a2:15], [60, a3>=0?a3:10]] };
+    await store.set(K.reward(), REWARD); moneyView(kid);
+  };
   document.getElementById('r-save').onclick = async ()=>{
     const a = parseFloat((document.getElementById('r-amt').value||'').replace(',','.'));
     const q = parseInt(document.getElementById('r-q').value,10);
@@ -2456,7 +2764,7 @@ function drawEditor(){
 
 
 (async function init(){
-  loadSyncSettings();
+  loadSyncSettings(); loadAI();
   await dbLoad();
   // reprise des données enregistrées par les versions précédentes (une clé par entrée)
   if(hasArtifact && !Object.keys(DB).length){
