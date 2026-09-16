@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B2A5B">
+<title>Le cahier — Lina & Ilyes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Nunito:wght@400;600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1B2A5B; --ink-soft:#4B5B8A; --paper:#FBFAF6; --grid:#CBD8EF;
+  --lina:#E0399A; --ilyes:#0E9C8E; --green:#17864F; --red:#D4342A;
+  --amber:#E08A00; --shadow:0 6px 0 rgba(27,42,91,.12);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{
+  font-family:'Nunito',system-ui,-apple-system,sans-serif;
+  color:var(--ink); background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:100% 30px, 30px 100%;
+  min-height:100vh; padding:env(safe-area-inset-top) 0 40px;
+}
+.wrap{max-width:820px; margin:0 auto; padding:18px 16px 0;}
+h1,h2,h3{font-family:'Baloo 2',system-ui,sans-serif; margin:0; line-height:1.15;}
+button{font-family:inherit; cursor:pointer; border:none; background:none;}
+.card{background:#fff; border:2.5px solid var(--ink); border-radius:18px; box-shadow:var(--shadow);}
+
+/* ---------- top bar ---------- */
+.bar{display:flex; align-items:center; gap:10px; margin-bottom:14px; min-height:44px;}
+.back{font-size:15px; font-weight:700; color:var(--ink); padding:9px 14px; border-radius:12px;
+      background:#fff; border:2px solid var(--ink);}
+.bar .who{margin-left:auto; font-weight:700; font-size:14px; padding:7px 14px; border-radius:999px; color:#fff;}
+
+/* ---------- home ---------- */
+.hero{text-align:center; padding:22px 0 12px;}
+.hero h1{font-size:clamp(34px,9vw,54px); letter-spacing:-.5px;}
+.hero p{margin:8px 0 0; font-size:16px; color:var(--ink-soft);}
+.pick{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:22px;}
+@media(max-width:520px){ .pick{grid-template-columns:1fr;} }
+.who-card{padding:22px 18px; text-align:left; position:relative; overflow:hidden;}
+.who-card .label{font-family:'Patrick Hand',cursive; font-size:34px; line-height:1;}
+.who-card .yr{font-size:14px; font-weight:700; color:var(--ink-soft); margin-top:6px;}
+.who-card .tape{position:absolute; top:-14px; right:18px; width:64px; height:34px;
+  background:rgba(255,225,120,.75); transform:rotate(8deg);}
+.who-card .dots{margin-top:16px; display:flex; gap:5px;}
+.who-card .dots i{width:9px; height:9px; border-radius:50%; display:block;}
+
+/* ---------- chapter list ---------- */
+.subject{margin:22px 0 10px; display:flex; align-items:baseline; gap:10px;}
+.subject h2{font-size:22px;}
+.subject span{font-size:13px; color:var(--ink-soft); font-weight:700;}
+.chap{display:flex; align-items:center; gap:14px; width:100%; text-align:left; padding:14px 16px; margin-bottom:10px;}
+.chap .n{width:38px; height:38px; flex:none; border-radius:11px; display:grid; place-items:center;
+         font-family:'Baloo 2'; font-size:19px; color:#fff;}
+.chap .t{flex:1; min-width:0;}
+.chap .t b{display:block; font-size:16.5px; font-family:'Baloo 2'; font-weight:600;}
+.chap .t small{font-size:12.5px; color:var(--ink-soft);}
+.chap .stars{font-size:15px; letter-spacing:1px; white-space:nowrap; color:#D9D2C0;}
+.chap .stars .on{color:var(--amber);}
+.chap .score{font-family:'Patrick Hand',cursive; font-size:19px; color:var(--red); white-space:nowrap;}
+
+/* ---------- exercise ---------- */
+.prog{height:9px; border-radius:99px; background:#E7E3D6; overflow:hidden; margin-bottom:16px;}
+.prog i{display:block; height:100%; border-radius:99px; transition:width .35s ease;}
+.qcard{padding:20px 18px 18px;}
+.qmeta{font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:8px;}
+.q{font-size:clamp(20px,5vw,26px); font-family:'Baloo 2'; font-weight:600; line-height:1.35;}
+.q .blank{border-bottom:3px dotted var(--ink-soft); padding:0 22px;}
+.qhelp{margin-top:8px; font-size:14px; color:var(--ink-soft); font-style:italic;}
+.answer{margin-top:18px;}
+input.txt{width:100%; font-family:'Patrick Hand',cursive; font-size:30px; color:var(--ink);
+  padding:10px 14px; border:none; border-bottom:3px solid var(--ink); background:#FFFDF4; border-radius:8px 8px 0 0;}
+input.txt:focus{outline:none; background:#FFF8DC;}
+.choices{display:grid; gap:10px;}
+.choice{padding:14px 16px; text-align:left; font-size:18px; font-weight:700; background:#fff;
+  border:2.5px solid var(--ink); border-radius:14px; box-shadow:var(--shadow); color:var(--ink);}
+.choice.sel{background:#FFF3B0;}
+.choice[disabled]{opacity:.55;}
+.choice.good{background:#DFF5E8; border-color:var(--green); color:var(--green);}
+.choice.bad{background:#FDE7E5; border-color:var(--red); color:var(--red);}
+.tools{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+.tool{font-size:13.5px; font-weight:700; padding:9px 13px; border-radius:11px; border:2px solid var(--ink-soft);
+  color:var(--ink-soft); background:#fff;}
+.tool.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+.cta{display:block; width:100%; margin-top:16px; padding:17px; border-radius:16px; color:#fff;
+  font-family:'Baloo 2'; font-size:21px; font-weight:600; box-shadow:0 5px 0 rgba(0,0,0,.18);}
+.cta:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.18);}
+.cta.ghost{background:#fff; color:var(--ink); border:2.5px solid var(--ink); box-shadow:var(--shadow);}
+
+/* feedback */
+.fb{margin-top:16px; padding:16px 16px 14px; border-radius:16px; border:2.5px solid; display:flex; gap:12px;}
+.fb.ok{background:#EAF7EF; border-color:var(--green);}
+.fb.no{background:#FDF0EF; border-color:var(--red);}
+.fb .mark{flex:none; width:40px;}
+.fb h3{font-size:19px; margin-bottom:4px;}
+.fb.ok h3{color:var(--green);} .fb.no h3{color:var(--red);}
+.fb p{margin:4px 0 0; font-size:14.5px; line-height:1.5;}
+.fb .sol{font-family:'Patrick Hand',cursive; font-size:22px;}
+@keyframes draw{to{stroke-dashoffset:0;}}
+.mark path{stroke-dasharray:120; stroke-dashoffset:120; animation:draw .45s ease forwards;}
+
+/* pavé de chiffres */
+.keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:14px;}
+.keypad button{font-family:'Baloo 2'; font-weight:600; font-size:27px; padding:15px 0; color:var(--ink);
+  background:#fff; border:2.5px solid var(--ink); border-radius:14px; box-shadow:var(--shadow);}
+.keypad button:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(27,42,91,.12);}
+.keypad button.alt{background:#FFF3B0;}
+
+/* canvas */
+.padwrap{margin-top:14px; border:2.5px dashed var(--ink-soft); border-radius:14px; background:#FFFDF4; overflow:hidden;}
+canvas{display:block; width:100%; height:210px; touch-action:none;}
+.padbar{display:flex; gap:10px; align-items:center; padding:8px; border-top:2px dashed var(--ink-soft);}
+.padhint{font-size:13px; font-weight:700; color:var(--ink-soft); line-height:1.3;}
+
+/* deux étapes */
+.steplab{font-size:13.5px; font-weight:700; color:var(--ink-soft); margin:14px 0 4px;}
+.steplab b{color:var(--ink);}
+input.txt.active{background:#FFF3B0; border-bottom-color:var(--ink);}
+input.txt.done{background:#EAF7EF; border-bottom-color:var(--green); color:var(--green);}
+.tt{display:inline;}
+.i{display:inline-flex; align-items:center; justify-content:center; width:21px; height:21px; margin-left:7px;
+   border:2px solid var(--ink-soft); color:var(--ink-soft); border-radius:50%; font-size:12px; font-weight:700;
+   font-family:'Nunito',sans-serif; font-style:normal; line-height:1; vertical-align:middle; cursor:pointer; user-select:none;}
+.i:active{background:var(--ink-soft); color:#fff;}
+.frx{display:none; font-size:13.5px; font-style:italic; font-weight:600; color:#1D4ED8;
+     font-family:'Nunito',sans-serif; margin-top:4px; line-height:1.35;}
+.tt.open .frx{display:block;}
+.ptab{width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;}
+.ptab th{text-align:left; font-size:11.5px; color:var(--ink-soft); border-bottom:2px solid #E7E3D6; padding:5px 4px;}
+.ptab td{padding:7px 4px; border-bottom:1px dotted #DDD8C8;}
+.ptab td.r{text-align:right; white-space:nowrap;}
+.pct{font-family:'Patrick Hand',cursive; font-size:19px;}
+.bars{display:flex; align-items:flex-end; gap:6px; height:110px; margin-top:8px;}
+.bars > div{flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px;}
+.bars .bar{width:100%; border-radius:6px 6px 0 0; min-height:3px;}
+.bars small{font-size:10px; color:var(--ink-soft); text-align:center; line-height:1.15;}
+.field{margin-top:10px;}
+.field label{display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:3px;}
+.field input, .field select, .field textarea{width:100%; font-family:'Nunito',sans-serif; font-size:15px; padding:9px 11px;
+  border:2px solid var(--ink); border-radius:10px; background:#fff; color:var(--ink);}
+.field textarea{min-height:60px;}
+.qrow{display:flex; gap:8px; align-items:flex-start; padding:8px; border:2px solid #E7E3D6; border-radius:10px; margin-top:8px; font-size:13px;}
+.qrow b{flex:1;}
+.del{color:var(--red); font-weight:700; font-size:13px; border:2px solid var(--red); border-radius:9px; padding:4px 9px; background:#fff;}
+.wallet{display:flex; align-items:center; gap:14px; width:100%; text-align:left; padding:14px 16px; margin-bottom:12px;}
+.wallet .coin{width:56px; height:56px; flex:none; border-radius:50%; display:grid; place-items:center; font-size:28px; background:#FFE9A8; border:3px solid #E08A00;}
+.wallet .amt{font-family:'Baloo 2',sans-serif; font-size:26px; font-weight:700; color:#B45309; line-height:1;}
+.task{display:flex; gap:12px; align-items:center; padding:11px 13px; border:2.5px solid var(--ink); border-radius:14px;
+      background:#fff; margin-bottom:9px; box-shadow:var(--shadow);}
+.task .ti{flex:1; min-width:0; font-size:14.5px; font-weight:700;}
+.task .pay{font-family:'Baloo 2',sans-serif; font-size:17px; color:#B45309; white-space:nowrap;}
+.task .go{font-size:13.5px; font-weight:700; padding:8px 12px; border-radius:11px; color:#fff; border:none;}
+.badge-wait{font-size:11.5px; font-weight:700; color:#B45309; background:#FFF3B0; border-radius:999px; padding:3px 9px;}
+.quote{border:2.5px solid var(--ink); border-radius:18px; background:#FFF8DC; padding:14px 16px; text-align:center; box-shadow:var(--shadow);}
+.quote .en{font-family:'Baloo 2',sans-serif; font-size:19px; font-weight:600; line-height:1.3;}
+.quote .fr{font-size:14px; margin-top:4px;}
+.quote .arq{font-family:'Noto Naskh Arabic',serif; direction:rtl; font-size:19px; margin-top:6px; line-height:1.8;}
+.subcard{display:flex; gap:14px; align-items:center; width:100%; text-align:left; padding:16px; margin-bottom:12px;}
+.subcard .ic{width:56px; height:56px; flex:none; border-radius:16px; display:grid; place-items:center; font-size:27px; color:#fff;}
+.subcard .bd{flex:1; min-width:0;}
+.subcard .ti{font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:600;}
+.subcard .st{font-size:12.5px; color:var(--ink-soft); margin-top:1px;}
+.subcard .barw{height:9px; border-radius:99px; background:#E7E3D6; margin-top:7px; overflow:hidden;}
+.subcard .barw i{display:block; height:100%; border-radius:99px;}
+.subcard .msg{font-size:12.5px; font-weight:700; margin-top:5px;}
+.newbadge{display:inline-block; background:#E08A00; color:#fff; font-size:11px; font-weight:700;
+  border-radius:999px; padding:2px 9px; margin-left:6px; vertical-align:middle;}
+.ava{border-radius:50%; object-fit:cover; border:4px solid; display:block; background:#fff;}
+.ar{font-family:'Noto Naskh Arabic','Geeza Pro','Arabic Typesetting',serif; direction:rtl; unicode-bidi:isolate;}
+.arbig{font-family:'Noto Naskh Arabic','Geeza Pro',serif; direction:rtl; unicode-bidi:isolate;
+  font-size:52px; line-height:1.5; display:inline-block; vertical-align:middle;}
+.argrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(78px,1fr)); gap:9px; margin-top:10px;}
+.argrid button{background:#fff; border:2.5px solid var(--ink); border-radius:14px; box-shadow:var(--shadow); padding:10px 4px;}
+.argrid button:active{transform:translateY(3px); box-shadow:none;}
+.argrid .g{font-family:'Noto Naskh Arabic',serif; font-size:34px; line-height:1.2; color:var(--ink);}
+.argrid .n{font-size:11px; font-weight:700; color:var(--ink-soft);}
+.argrid .p{font-size:10.5px; font-style:italic; font-weight:700; color:#1D4ED8; line-height:1.2; margin-top:1px;}
+.forms{display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-top:10px;}
+.forms > div{border:2.5px solid #E7E3D6; border-radius:14px; background:#fff; padding:10px 4px; text-align:center;}
+.forms .f{font-family:'Noto Naskh Arabic',serif; font-size:44px; line-height:1.4; color:var(--ink);}
+.forms .lab{font-size:11.5px; font-weight:700; color:var(--ink-soft); line-height:1.25;}
+.forms .none{font-size:13px; color:#C7C2B2; padding:14px 0;}
+.speak{font-size:15px; font-weight:700; padding:10px 15px; border-radius:12px; border:2.5px solid var(--ink);
+  background:#FFF3B0; color:var(--ink); box-shadow:var(--shadow);}
+.fb.tip{background:#FFFBEB; border-color:var(--amber);}
+.fb.tip h3{color:var(--amber);}
+
+/* results */
+.result{padding:26px 20px; text-align:center;}
+.result .big{font-family:'Patrick Hand',cursive; font-size:64px; color:var(--red); line-height:1;}
+.result .circle{display:inline-block; padding:14px 26px; border:4px solid var(--red); border-radius:50%/40%;}
+.result h2{font-size:26px; margin:16px 0 6px;}
+.result p{font-size:15.5px; color:var(--ink-soft); margin:0 auto; max-width:44ch;}
+.recap{margin-top:18px; text-align:left;}
+.recap div{display:flex; gap:10px; padding:9px 4px; border-bottom:1px dotted #C9C2AF; font-size:14.5px;}
+.recap b{flex:none; width:24px; text-align:center;}
+.foot{text-align:center; font-size:12.5px; color:var(--ink-soft); margin-top:26px;}
+.hide{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ============================================================ DONNÉES */
+const DATA = {
+  lina: { name:"Lina", ar:"لينا", year:"Year 5", accent:"var(--lina)", hex:"#E0399A", emoji:"🌸",
+    subjects:[
+      { name:"Maths", note:"Place value & decimals", sets:[
+        { id:"l-pv", title:"La maison des nombres", sub:"Place value — millions → unités", qs:[
+          {t:"choice", q:"In <b>347</b>, which column is the <b>4</b> in?", c:["ones","tens","hundreds","tenths"], a:1,
+           e:"Le 4 est le deuxième chiffre en partant de la droite : c'est la colonne des <b>tens</b> (dizaines)."},
+          {t:"choice", q:"In <b>6 218</b>, what is the value of the <b>6</b>?", c:["6","60","600","6 000"], a:3,
+           e:"Le 6 est dans la colonne des <b>thousands</b> (milliers), donc il vaut 6 000."},
+          {t:"choice", q:"In <b>8.3</b>, which column is the <b>3</b> in?", c:["tens","ones","tenths","hundredths"], a:2,
+           e:"Juste après le point décimal, c'est la colonne des <b>tenths</b> (dixièmes)."},
+          {t:"choice", q:"In <b>14.07</b>, what is the value of the <b>7</b>?", c:["7","0.7","0.07","70"], a:2,
+           e:"Deuxième place après le point = <b>hundredths</b> (centièmes), donc 0.07."},
+          {t:"choice", q:"In <b>1 503 264</b>, which column is the <b>5</b> in?", c:["thousands","ten thousands","hundred thousands","millions"], a:2,
+           e:"1 | 503 | 264 : le 5 est le premier chiffre du groupe des milliers, donc <b>hundred thousands</b> (centaines de mille) = 500 000."},
+          {t:"num", q:"What is the value of the <b>9</b> in <b>92.75</b>?", a:90,
+           e:"Le 9 est dans la colonne des dizaines (tens) : il vaut 90."},
+          {t:"num", q:"Which digit is in the <b>tens</b> place in <b>4582.37</b>?", a:8,
+           e:"4 5 <b>8</b> 2 . 3 7 → le chiffre des dizaines est le 8."},
+          {t:"num", q:"Which digit is in the <b>hundredths</b> place in <b>4582.37</b>?", a:7,
+           e:"Après le point : 3 = tenths, 7 = hundredths. La réponse est 7."}
+        ]},
+        { id:"l-dec", title:"Les décimales", sub:"Tenths, hundredths, thousandths", qs:[
+          {t:"choice", q:"<b>0.1</b> is the same as…", c:["1/10","1/100","1/1000","10"], a:0,
+           e:"0.1 = un dixième = 1/10 (one tenth)."},
+          {t:"choice", q:"<b>0.01</b> is called…", c:["one tenth","one hundredth","one thousandth","one unit"], a:1,
+           e:"0.01 = un centième = <b>one hundredth</b>."},
+          {t:"num", q:"0.5 = <span class='blank'></span> / 10", a:5, e:"0.5 = 5 dixièmes = 5/10."},
+          {t:"num", q:"0.36 = <span class='blank'></span> / 100", a:36, e:"Deux chiffres après le point = des centièmes : 36/100."},
+          {t:"choice", q:"Which is bigger?", c:["0.4","0.35"], a:0,
+           e:"On compare d'abord les dixièmes : 4 dixièmes > 3 dixièmes. Le nombre de chiffres ne fait pas la taille !"},
+          {t:"choice", q:"Which is bigger?", c:["0.7","0.68"], a:0,
+           e:"7 dixièmes contre 6 dixièmes : 0.7 est plus grand."},
+          {t:"num", q:"Write <b>45 hundredths</b> as a decimal.", a:0.45, e:"45 centièmes = 0.45."},
+          {t:"num", q:"Write <b>7 thousandths</b> as a decimal.", a:0.007, e:"7 millièmes = 0.007 (trois chiffres après le point)."}
+        ]},
+        { id:"l-x10", title:"× 10 et ÷ 10", sub:"Multiplier et diviser par 10, 100", qs:[
+          {t:"num", q:"3.4 × 10 =", a:34, e:"× 10 : les chiffres se décalent d'un rang vers la gauche → 34."},
+          {t:"num", q:"3.4 ÷ 10 =", a:0.34, e:"÷ 10 : les chiffres se décalent d'un rang vers la droite → 0.34."},
+          {t:"num", q:"52 ÷ 10 =", a:5.2, e:"52 ÷ 10 = 5.2."},
+          {t:"num", q:"0.6 × 100 =", a:60, e:"× 100 : deux rangs vers la gauche → 60."},
+          {t:"num", q:"7.25 × 10 =", a:72.5, e:"7.25 × 10 = 72.5."},
+          {t:"num", q:"480 ÷ 100 =", a:4.8, e:"480 ÷ 100 = 4.8."},
+          {t:"num", q:"40 cm = <span class='blank'></span> m", a:0.4, e:"1 m = 100 cm, donc 40 ÷ 100 = 0.4 m."},
+          {t:"num", q:"185 cm = <span class='blank'></span> m", a:1.85, e:"185 ÷ 100 = 1.85 m."}
+        ]},
+        { id:"l-cmp", title:"Comparer les nombres", sub:"Greater than, less than, equal", qs:[
+          {t:"choice", q:"3 456 <span class='blank'></span> 3 465", c:["&gt;","&lt;","="], a:1,
+           e:"Même début (34), puis 5 dizaines contre 6 dizaines : 3 456 est plus petit."},
+          {t:"choice", q:"12.5 <span class='blank'></span> 12.50", c:["&gt;","&lt;","="], a:2,
+           e:"Un zéro à la fin d'un nombre décimal ne change rien : 12.5 = 12.50."},
+          {t:"choice", q:"0.7 <span class='blank'></span> 0.68", c:["&gt;","&lt;","="], a:0,
+           e:"7 dixièmes > 6 dixièmes, donc 0.7 est plus grand."},
+          {t:"choice", q:"109 999 <span class='blank'></span> 110 000", c:["&gt;","&lt;","="], a:1,
+           e:"109 999 n'a pas encore atteint 110 000 : il est plus petit."},
+          {t:"choice", q:"5.06 <span class='blank'></span> 5.6", c:["&gt;","&lt;","="], a:1,
+           e:"0 dixième contre 6 dixièmes : 5.06 est plus petit."},
+          {t:"choice", q:"2 400 000 <span class='blank'></span> 240 000", c:["&gt;","&lt;","="], a:0,
+           e:"2 400 000 a un chiffre de plus : il est dix fois plus grand."},
+          {t:"choice", q:"0.303 <span class='blank'></span> 0.33", c:["&gt;","&lt;","="], a:1,
+           e:"Dixièmes égaux (3), puis 0 centième contre 3 centièmes : 0.303 est plus petit."},
+          {t:"choice", q:"88.9 <span class='blank'></span> 88.90", c:["&gt;","&lt;","="], a:2,
+           e:"Le zéro final ne change rien : les deux nombres sont égaux."}
+        ]},
+        { id:"l-words", title:"Numbers in words", sub:"Lire et écrire les nombres en anglais", qs:[
+          {t:"choice", q:"How do you say <b>3 407</b>?", c:["three thousand four hundred and seven","three hundred and forty-seven","thirty-four thousand and seven"], a:0,
+           e:"3 407 = three thousand four hundred and seven. En anglais britannique on met « and » après les centaines."},
+          {t:"choice", q:"How do you say <b>2.75</b>?", c:["two point seventy-five","two point seven five"], a:1,
+           e:"Après le point, on lit les chiffres <b>un par un</b> : two point seven five."},
+          {t:"choice", q:"How do you say <b>150 000</b>?", c:["one hundred fifty thousands","one hundred and fifty thousand","fifteen thousand"], a:1,
+           e:"one hundred and fifty thousand — « thousand » ne prend pas de s ici."},
+          {t:"choice", q:"How do you say <b>9.08</b>?", c:["nine point eight","nine point zero eight","nine point o eight"], a:1,
+           e:"On lit chaque chiffre : nine point zero eight."},
+          {t:"num", q:"Write in figures: <b>two thousand five hundred</b>", a:2500, e:"two thousand five hundred = 2 500."},
+          {t:"num", q:"Write in figures: <b>six point zero four</b>", a:6.04, e:"six point zero four = 6.04."}
+        ]}
+      ]}
+    ]},
+
+  ilyes: { name:"Ilyes", ar:"إلياس", year:"Year 7", accent:"var(--ilyes)", hex:"#0E9C8E", emoji:"⚡",
+    subjects:[
+      { name:"Maths", note:"Integers — les nombres relatifs", sets:[
+        { id:"i-add", title:"Additionner", sub:"5 + −3, −6 + −4…", qs:[
+          {t:"num", q:"5 + −3 =", a:2, e:"« + − » se simplifie en « − » : 5 − 3 = 2."},
+          {t:"num", q:"−6 + −4 =", a:-10, e:"Deux négatifs qui s'ajoutent : on descend encore. −6 puis 4 de plus vers la gauche = −10."},
+          {t:"num", q:"−3 + 4 =", a:1, e:"Je pars de −3 et j'avance de 4 : je dépasse zéro, j'arrive à 1."},
+          {t:"num", q:"3 + −7 =", a:-4, e:"3 − 7 = −4."},
+          {t:"num", q:"9 + −5 =", a:4, e:"9 − 5 = 4."},
+          {t:"num", q:"−10 + 4 =", a:-6, e:"Je pars de −10 et j'avance de 4 : je n'arrive pas encore à zéro → −6."},
+          {t:"num", q:"−7 + −3 =", a:-10, e:"7 + 3 = 10, et les deux sont négatifs → −10."},
+          {t:"num", q:"12 + −20 =", a:-8, e:"12 − 20 = −8 : le plus grand nombre (20) est négatif, le résultat l'est aussi."}
+        ]},
+        { id:"i-mm", title:"Le double moins  − − = +", sub:"LA règle à ne plus rater", qs:[
+          {t:"num", q:"4 − −6 =", a:10, e:"Deux moins collés font un plus : 4 + 6 = 10."},
+          {t:"num", q:"3 − −5 =", a:8, e:"3 − −5 devient 3 + 5 = 8."},
+          {t:"num", q:"−2 − −5 =", a:3, e:"−2 − −5 devient −2 + 5 = 3. (Attention : ce n'est pas −7 !)"},
+          {t:"num", q:"20 − −5 =", a:25, e:"20 + 5 = 25."},
+          {t:"num", q:"−10 − −15 =", a:5, e:"−10 + 15 = 5."},
+          {t:"num", q:"−2 − −13 =", a:11, e:"−2 + 13 = 11."},
+          {t:"num", q:"7 − −7 =", a:14, e:"7 + 7 = 14."},
+          {t:"num", q:"−12 − −20 =", a:8, e:"−12 + 20 = 8."}
+        ]},
+        { id:"i-left", title:"Descendre sous zéro", sub:"−6 − 3, −4 − 6…", qs:[
+          {t:"num", q:"−6 − 3 =", a:-9, e:"Je suis déjà à −6 et j'enlève encore 3 : je descends → −9."},
+          {t:"num", q:"−4 − 6 =", a:-10, e:"4 + 6 = 10, et les deux signes disent « à gauche » → −10."},
+          {t:"num", q:"−3 − 20 =", a:-23, e:"3 + 20 = 23 → −23."},
+          {t:"num", q:"−5 − 5 =", a:-10, e:"−5 − 5 = −10."},
+          {t:"num", q:"−15 − 7 =", a:-22, e:"15 + 7 = 22 → −22."},
+          {t:"num", q:"6 − 14 =", a:-8, e:"Je pars de 6 et j'enlève 14 : je passe sous zéro → −8."},
+          {t:"num", q:"−20 − 4 =", a:-24, e:"−24."},
+          {t:"num", q:"10 − 25 =", a:-15, e:"25 − 10 = 15, et j'enlève plus que je n'ai → −15."}
+        ]},
+        { id:"i-md", title:"× et ÷ : la règle des signes", sub:"Mêmes signes → +, signes différents → −", qs:[
+          {t:"num", q:"−3 × 5 =", a:-15, e:"3 × 5 = 15 ; signes différents → −15."},
+          {t:"num", q:"7 × −6 =", a:-42, e:"7 × 6 = 42 ; signes différents → −42."},
+          {t:"num", q:"−6 × 7 =", a:-42, e:"Table à revoir : 6 × 7 = 42. Signes différents → −42."},
+          {t:"num", q:"−4 × −5 =", a:20, e:"Mêmes signes → positif : 20."},
+          {t:"num", q:"20 ÷ −4 =", a:-5, e:"20 ÷ 4 = 5 ; signes différents → −5."},
+          {t:"num", q:"−54 ÷ −9 =", a:6, e:"54 ÷ 9 = 6 ; mêmes signes → +6."},
+          {t:"num", q:"−18 ÷ −3 =", a:6, e:"Mêmes signes → +6."},
+          {t:"num", q:"−63 ÷ 9 =", a:-7, e:"63 ÷ 9 = 7 ; signes différents → −7."}
+        ]},
+        { id:"i-br", title:"Les parenthèses d'abord", sub:"BIDMAS", qs:[
+          {t:"num", q:"(−5 + −7) ÷ 4 =", a:-3, e:"Parenthèse : −5 + −7 = −12. Puis −12 ÷ 4 = −3."},
+          {t:"num", q:"(−10 + −6) ÷ 2 =", a:-8, e:"−10 + −6 = −16, puis −16 ÷ 2 = −8."},
+          {t:"num", q:"(−6 + −4) × 3 =", a:-30, e:"−6 + −4 = −10, puis −10 × 3 = −30."},
+          {t:"num", q:"(−2 − −5) × −10 =", a:-30, e:"Parenthèse : −2 − −5 = −2 + 5 = 3. Puis 3 × −10 = −30."},
+          {t:"num", q:"(1 − −3) × −7 =", a:-28, e:"1 − −3 = 1 + 3 = 4. Puis 4 × −7 = −28."},
+          {t:"num", q:"−20 ÷ (3 − −2) =", a:-4, e:"3 − −2 = 5. Puis −20 ÷ 5 = −4."},
+          {t:"num", q:"12 ÷ (2 − −4) =", a:2, e:"2 − −4 = 6. Puis 12 ÷ 6 = 2."},
+          {t:"num", q:"(6 − 14) ÷ 4 =", a:-2, e:"6 − 14 = −8. Puis −8 ÷ 4 = −2."}
+        ]},
+        { id:"i-eq", title:"Résoudre une équation", sub:"Trouve x", qs:[
+          {t:"num", q:"x + 7 = 14 &nbsp; → &nbsp; x =", a:7, e:"J'enlève 7 des deux côtés : x = 14 − 7 = 7. Vérif : 7 + 7 = 14 ✓"},
+          {t:"num", q:"x − 9 = 18 &nbsp; → &nbsp; x =", a:27, e:"J'ajoute 9 des deux côtés : x = 18 + 9 = 27."},
+          {t:"num", q:"−2x = 6 &nbsp; → &nbsp; x =", a:-3, e:"Je divise par −2 : x = 6 ÷ −2 = −3. Vérif : −2 × −3 = 6 ✓"},
+          {t:"num", q:"−9x = 18 &nbsp; → &nbsp; x =", a:-2, e:"x = 18 ÷ −9 = −2."},
+          {t:"num", q:"6x = −18 &nbsp; → &nbsp; x =", a:-3, e:"x = −18 ÷ 6 = −3."},
+          {t:"num", q:"x − −3 = 10 &nbsp; → &nbsp; x =", a:7, e:"x − −3 = x + 3, donc x + 3 = 10 et x = 7."},
+          {t:"num", q:"−4x = −20 &nbsp; → &nbsp; x =", a:5, e:"x = −20 ÷ −4 = 5 (mêmes signes → positif)."},
+          {t:"num", q:"5x = −45 &nbsp; → &nbsp; x =", a:-9, e:"x = −45 ÷ 5 = −9."}
+        ]}
+      ]},
+      { name:"English", note:"Punctuation, apostrophes & The Landlady", sets:[
+        { id:"e-apo", title:"Apostrophes", sub:"its / it's, possession, pluriels", qs:[
+          {t:"choice", q:"The dog bit <span class='blank'></span> owner.", c:["it's","its"], a:1,
+           e:"« its » = son / sa. Test : « the dog bit it is owner » ne veut rien dire → donc <b>its</b>, sans apostrophe."},
+          {t:"choice", q:"<span class='blank'></span> closed. Don't run!", c:["Its","It's"], a:1,
+           e:"Ici on peut dire « it is closed » → donc <b>it's</b> avec apostrophe."},
+          {t:"choice", q:"What are your <span class='blank'></span> names? (you have two parents)", c:["parent's","parents'","parents"], a:1,
+           e:"Plusieurs parents : le pluriel est « parents », et l'apostrophe de possession se met <b>après</b> le s → parents'."},
+          {t:"choice", q:"She ate five <span class='blank'></span> for supper.", c:["pear's","pears'","pears"], a:2,
+           e:"Un simple pluriel ne prend JAMAIS d'apostrophe : five pears."},
+          {t:"choice", q:"The cat licked <span class='blank'></span> paws.", c:["it's","its"], a:1, e:"Possession → <b>its</b>."},
+          {t:"choice", q:"<span class='blank'></span> been a long day.", c:["Its","It's"], a:1, e:"« It has been » → <b>It's</b>."},
+          {t:"text", q:"Rewrite: <i>the bike of my brother</i> (one brother)", a:["my brother's bike","my brothers bike"], strict:["my brother's bike"],
+           e:"Un seul possesseur → 's : <b>my brother's bike</b>."},
+          {t:"text", q:"Rewrite: <i>the coats of the children</i>", a:["the children's coats","children's coats"],
+           e:"« children » est un pluriel irrégulier (pas de s), donc on ajoute 's : <b>the children's coats</b>."},
+          {t:"text", q:"Write the contraction: <i>do not</i>", a:["don't","dont"], strict:["don't"],
+           e:"do not → <b>don't</b> : l'apostrophe remplace le « o » manquant."},
+          {t:"text", q:"Write the contraction: <i>there is</i>", a:["there's","theres"], strict:["there's"],
+           e:"there is → <b>there's</b>."}
+        ]},
+        { id:"e-cap", title:"Capital letters", sub:"Réécris les phrases", qs:[
+          {t:"sentence", q:"she has a friend who comes from london, england.", a:["She has a friend who comes from London, England."],
+           e:"Majuscule en début de phrase, et London / England sont des noms propres."},
+          {t:"sentence", q:"on monday i have french and english.", a:["On Monday I have French and English."],
+           e:"Les jours, les langues et le pronom « I » prennent toujours une majuscule en anglais."},
+          {t:"sentence", q:"my uncle works for the bbc.", a:["My uncle works for the BBC."],
+           e:"Un sigle (acronym) s'écrit tout en majuscules : BBC."},
+          {t:"sentence", q:"in september billy weaver travelled to bath.", a:["In September Billy Weaver travelled to Bath."],
+           e:"Mois + prénom + nom + ville : tous des noms propres."},
+          {t:"sentence", q:"roald dahl wrote the landlady.", a:["Roald Dahl wrote The Landlady.","Roald Dahl wrote 'The Landlady'."],
+           e:"Le titre d'une œuvre prend des majuscules : The Landlady."},
+          {t:"sentence", q:"billy arrived in bath late at night", a:["Billy arrived in Bath late at night."],
+           e:"N'oublie pas le point final : une phrase commence par une majuscule et finit par un point."}
+        ]},
+        { id:"e-past", title:"The past simple", sub:"Mets le verbe au passé", qs:[
+          {t:"text", q:"He (speak) <span class='blank'></span> to the police.", a:["spoke"], e:"speak → <b>spoke</b> (verbe irrégulier)."},
+          {t:"text", q:"She (say) <span class='blank'></span> nothing.", a:["said"], e:"say → <b>said</b>. Attention : « sad » veut dire triste !"},
+          {t:"text", q:"The owner (see) <span class='blank'></span> a ghost.", a:["saw"], e:"see → <b>saw</b>."},
+          {t:"text", q:"They (go) <span class='blank'></span> to Australia.", a:["went"], e:"go → <b>went</b>."},
+          {t:"text", q:"The ghost (take) <span class='blank'></span> his place.", a:["took"], e:"take → <b>took</b>."},
+          {t:"text", q:"She (eat) <span class='blank'></span> five pears.", a:["ate"], e:"eat → <b>ate</b>."},
+          {t:"text", q:"The exterminator (catch) <span class='blank'></span> the ghosts.", a:["caught"], e:"catch → <b>caught</b>."},
+          {t:"text", q:"He (be) <span class='blank'></span> very sad.", a:["was"], e:"he / she / it → <b>was</b> (I was, you were, he was)."},
+          {t:"text", q:"He (enjoy) <span class='blank'></span> his life there.", a:["enjoyed"], e:"Verbe régulier : enjoy + ed = <b>enjoyed</b>. On ne dit jamais « he is enjoy »."},
+          {t:"text", q:"Billy (arrive) <span class='blank'></span> at nine o'clock.", a:["arrived"], e:"arrive se termine déjà par un e : on ajoute juste d → <b>arrived</b>."}
+        ]},
+        { id:"e-fr", title:"Les pièges du français", sub:"Ne laisse aucun mot français", qs:[
+          {t:"text", q:"« le propriétaire » (d'une maison) =", a:["owner","the owner","landlord","the landlord"], e:"the <b>owner</b> (ou landlord). « propriétaire » n'existe pas en anglais."},
+          {t:"text", q:"« un fantôme » =", a:["ghost","a ghost"], e:"a <b>ghost</b>."},
+          {t:"text", q:"« hanté » =", a:["haunted"], e:"<b>haunted</b> : a haunted house."},
+          {t:"choice", q:"Which sentence is correct?", c:["He is enjoy his life.","He enjoys his life."], a:1,
+           e:"On n'utilise jamais « be » + verbe simple. → He enjoys / He enjoyed."},
+          {t:"choice", q:"He spoke <span class='blank'></span> the police.", c:["with","to"], a:1,
+           e:"On dit <b>to speak to somebody</b> (et non « speak with » dans ce sens)."},
+          {t:"choice", q:"He enjoyed his <span class='blank'></span> in Australia.", c:["live","life"], a:1,
+           e:"<b>life</b> = la vie (nom). « live » = vivre (verbe)."},
+          {t:"choice", q:"Which spelling is correct?", c:["suspence","suspense"], a:1, e:"On écrit <b>suspense</b>, avec un s."},
+          {t:"choice", q:"Which spelling is correct?", c:["Tursday","Thursday","Thursdai"], a:1, e:"<b>Thursday</b> — attention au « h »."}
+        ]},
+        { id:"e-land", title:"The Landlady", sub:"Roald Dahl — vocabulaire et compréhension", qs:[
+          {t:"choice", q:"Where does Billy Weaver come from?", c:["Bath","Reading","London"], a:1,
+           e:"Il vient de <b>Reading</b> et arrive à <b>Bath</b>."},
+          {t:"choice", q:"What does <b>sinister</b> mean?", c:["very funny","giving the impression that something bad is going to happen","very old"], a:1,
+           e:"sinister = qui donne l'impression que quelque chose de dangereux ou de mauvais va arriver."},
+          {t:"choice", q:"What does <b>briskly</b> mean?", c:["slowly and sadly","quickly, with energy and purpose","very quietly"], a:1,
+           e:"briskly = rapidement, avec énergie et assurance."},
+          {t:"choice", q:"A <b>landlady</b> is…", c:["a woman who rents out rooms","a woman who owns a farm","a policewoman"], a:0,
+           e:"a landlady = une logeuse, une propriétaire qui loue des chambres."},
+          {t:"choice", q:"Why is Billy happy with the bed and breakfast?", c:["because it is cheap","because it is near the station","because his friend lives there"], a:0,
+           e:"Parce que c'est très bon marché (cheap) — et que la maison a l'air chaleureuse."},
+          {t:"choice", q:"There are no coats or hats in the hall. What does that mean?", c:["the landlady is very tidy","no other lodgers are staying","it is summer"], a:1,
+           e:"Aucun autre pensionnaire (lodger) ne loge là : c'est un indice inquiétant."},
+          {t:"choice", q:"<b>Dramatic irony</b> is when…", c:["the reader knows something the character does not","the story is very funny","the story has a happy ending"], a:0,
+           e:"Le lecteur comprend le danger avant Billy : c'est ce décalage qui crée le suspense."},
+          {t:"choice", q:"Which animals are in the landlady's living room?", c:["a cat and a fish","a parrot and a dachshund","two rabbits"], a:1,
+           e:"Un perroquet (parrot) et un teckel (dachshund)… qui ne sont pas vivants."}
+        ]}
+      ]}
+    ]}
+};
+
+/* ---- étapes guidées : où l'enfant doit écrire la ligne intermédiaire ---- */
+(function addSteps(){
+  const find = id => { for(const k in DATA) for(const su of DATA[k].subjects) for(const st of su.sets) if(st.id===id) return st; };
+  const clean = s => s.replace(/<[^>]+>/g,'').replace(/&nbsp;/g,'').replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/=/g,'').trim();
+  find('i-mm').qs.forEach(q=>{ q.step = { ask:"réécris le calcul en remplaçant « − − » par « + »", type:'expr', want:q.a, noDouble:true,
+    ph:"par exemple −2 + 5",
+    e:"Deux moins qui se touchent deviennent un plus. <b>−2 − −5</b> se réécrit <b>−2 + 5</b>." }; });
+  find('i-br').qs.forEach(q=>{ const m = clean(q.q).match(/\(([^)]*)\)/); let v=null;
+    try{ v = Function('"use strict";return ('+m[1]+')')(); }catch(e){}
+    q.step = { ask:"combien fait la parenthèse ?", type:'num', a:v, ph:"la valeur de la parenthèse",
+      e:"Avec BIDMAS, on calcule <b>toujours la parenthèse en premier</b>, sur une ligne à part." }; });
+  find('i-eq').qs.forEach(q=>{ q.step = { ask:"écris le calcul qui donne x", type:'expr', want:q.a,
+    ph:"par exemple 14 − 7 ou 6 ÷ −2",
+    e:"J'utilise l'opération inverse : <b>+ devient −</b>, <b>× devient ÷</b>." }; });
+})();
+
+
+/* ---- titres en anglais + traductions ---- */
+(function localise(){
+  const find = id => { for(const k in DATA) for(const su of DATA[k].subjects) for(const st of su.sets) if(st.id===id) return st; };
+  const TT = {
+    'l-pv'   : ["The number house","La maison des nombres","Place value: from millions to ones","La valeur de position, des millions aux unités"],
+    'l-dec'  : ["Decimals","Les décimales","Tenths, hundredths and thousandths","Dixièmes, centièmes et millièmes"],
+    'l-x10'  : ["Multiplying and dividing by 10","Multiplier et diviser par 10","× 10, × 100, ÷ 10, ÷ 100","× 10, × 100, ÷ 10, ÷ 100 et les mesures"],
+    'l-cmp'  : ["Comparing numbers","Comparer les nombres","Greater than, less than, equal to","Plus grand, plus petit, égal"],
+    'l-words': ["Numbers in words","Les nombres en lettres","Reading and writing numbers in English","Lire et écrire les nombres en anglais"],
+    'i-add'  : ["Adding integers","Additionner les relatifs","5 + −3, −6 + −4…","5 + −3, −6 + −4…"],
+    'i-mm'   : ["Subtracting a negative","Le double moins","− − = + : the rule to master","− − = + : la règle à ne plus rater"],
+    'i-left' : ["Going further left","Descendre sous zéro","−6 − 3, −4 − 6…","−6 − 3, −4 − 6…"],
+    'i-md'   : ["Multiplying and dividing","Multiplier et diviser","Same signs → +, different signs → −","Mêmes signes → +, signes différents → −"],
+    'i-br'   : ["Brackets first","Les parenthèses d'abord","BIDMAS: always start with the bracket","BIDMAS : on commence toujours par la parenthèse"],
+    'i-eq'   : ["Solving equations","Résoudre une équation","Find x","Trouve x"],
+    'e-apo'  : ["Apostrophes","Les apostrophes","its / it's, possession, plurals","its / it's, possession, pluriels"],
+    'e-cap'  : ["Capital letters","Les majuscules","Rewrite the sentences","Réécris les phrases"],
+    'e-past' : ["The past simple","Le passé","Put the verb into the past","Mets le verbe au passé"],
+    'e-fr'   : ["French traps","Les pièges du français","Never leave a French word in English","Ne laisse aucun mot français"],
+    'e-land' : ["The Landlady","The Landlady","Roald Dahl: vocabulary and comprehension","Roald Dahl : vocabulaire et compréhension"]
+  };
+  for(const id in TT){ const st = find(id); if(!st) continue;
+    st.title = TT[id][0]; st.titleFr = TT[id][1]; st.sub = TT[id][2]; st.subFr = TT[id][3]; }
+
+  DATA.lina.subjects[0].noteFr  = "Valeur de position et décimales";
+  DATA.ilyes.subjects[0].note   = "Integers — negative numbers";
+  DATA.ilyes.subjects[0].noteFr = "Les nombres relatifs";
+  DATA.ilyes.subjects[1].noteFr = "Ponctuation, apostrophes et The Landlady";
+
+  const FR = {
+    'l-pv':["Dans 347, dans quelle colonne se trouve le 4 ?","Dans 6 218, quelle est la valeur du 6 ?",
+      "Dans 8.3, dans quelle colonne se trouve le 3 ?","Dans 14.07, quelle est la valeur du 7 ?",
+      "Dans 1 503 264, dans quelle colonne se trouve le 5 ?","Quelle est la valeur du 9 dans 92.75 ?",
+      "Quel chiffre est à la place des dizaines dans 4582.37 ?","Quel chiffre est à la place des centièmes dans 4582.37 ?"],
+    'l-dec':["0.1, c'est la même chose que…","0.01 s'appelle…","0.5 = combien de dixièmes ?","0.36 = combien de centièmes ?",
+      "Lequel est le plus grand ?","Lequel est le plus grand ?","Écris 45 centièmes en nombre décimal.","Écris 7 millièmes en nombre décimal."],
+    'l-x10':["","","","","","","Convertis en mètres.","Convertis en mètres."],
+    'l-words':["Comment dit-on 3 407 en anglais ?","Comment lit-on 2.75 en anglais ?","Comment dit-on 150 000 en anglais ?",
+      "Comment lit-on 9.08 en anglais ?","Écris ce nombre en chiffres.","Écris ce nombre en chiffres."],
+    'e-apo':["Le chien a mordu son propriétaire.","C'est fermé. Ne cours pas !","Quels sont les prénoms de tes parents ? (tu as deux parents)",
+      "Elle a mangé cinq poires au dîner.","Le chat a léché ses pattes.","Ça a été une longue journée.",
+      "Réécris : le vélo de mon frère (un seul frère).","Réécris : les manteaux des enfants.",
+      "Écris la contraction de « do not ».","Écris la contraction de « there is »."],
+    'e-cap':["Elle a une amie qui vient de Londres, en Angleterre.","Le lundi, j'ai français et anglais.",
+      "Mon oncle travaille pour la BBC.","En septembre, Billy Weaver est allé à Bath.",
+      "Roald Dahl a écrit The Landlady.","Billy est arrivé à Bath tard le soir."],
+    'e-past':["Il a parlé à la police.","Elle n'a rien dit.","Le propriétaire a vu un fantôme.","Ils sont allés en Australie.",
+      "Le fantôme a pris sa place.","Elle a mangé cinq poires.","L'exterminateur a attrapé les fantômes.",
+      "Il était très triste.","Il a apprécié sa vie là-bas.","Billy est arrivé à neuf heures."],
+    'e-fr':["","","","Quelle phrase est correcte ?","Il a parlé à la police.","Il a apprécié sa vie en Australie.",
+      "Quelle orthographe est correcte ?","Quelle orthographe est correcte ?"],
+    'e-land':["D'où vient Billy Weaver ?","Que veut dire « sinister » ?","Que veut dire « briskly » ?",
+      "Une « landlady », qu'est-ce que c'est ?","Pourquoi Billy est-il content de cette chambre d'hôtes ?",
+      "Il n'y a ni manteaux ni chapeaux dans l'entrée. Qu'est-ce que ça veut dire ?",
+      "L'ironie dramatique, c'est quand…","Quels animaux y a-t-il dans le salon de la logeuse ?"]
+  };
+  for(const id in FR){ const st = find(id); if(!st) continue;
+    FR[id].forEach((f,i)=>{ if(f && st.qs[i]) st.qs[i].fr = f; }); }
+
+  // consignes des étapes en anglais
+  const S1 = { 'i-mm':["rewrite the calculation, changing « − − » into « + »","réécris le calcul en remplaçant « − − » par « + »"],
+               'i-br':["what does the bracket equal?","combien fait la parenthèse ?"],
+               'i-eq':["write the calculation that gives x","écris le calcul qui donne x"] };
+  for(const id in S1){ const st = find(id); if(!st) continue;
+    st.qs.forEach(q=>{ if(q.step){ q.step.ask = S1[id][0]; q.step.askFr = S1[id][1]; } }); }
+})();
+
+
+/* ============================================================ ALPHABET ARABE */
+/* c = lettre · n = nom arabe · t = translittération · j = se lie à gauche ?
+   sE/sF = le son en anglais / en français · w = mot exemple · wt = translittération · wf = sens */
+const AR = [
+ {c:'ا',n:'ألف',t:'alif', j:false, sE:'a long « a », as in "father"', sF:'un « a » long, comme dans « papa »', w:'أسد', wt:'asad', wf:'un lion'},
+ {c:'ب',n:'باء',t:'bāʾ',  j:true,  sE:'« b » as in "boy"',            sF:'« b » comme dans « bateau »',      w:'بيت', wt:'bayt', wf:'une maison'},
+ {c:'ت',n:'تاء',t:'tāʾ',  j:true,  sE:'« t » as in "table"',          sF:'« t » comme dans « table »',       w:'تفاح', wt:'tuffāḥ', wf:'des pommes'},
+ {c:'ث',n:'ثاء',t:'thāʾ', j:true,  sE:'« th » as in "think"',         sF:'le « th » anglais de « think », la langue entre les dents', w:'ثعلب', wt:'thaʿlab', wf:'un renard'},
+ {c:'ج',n:'جيم',t:'jīm',  j:true,  sE:'« j » as in "jam"',            sF:'« dj » comme dans « jean » en anglais', w:'جمل', wt:'jamal', wf:'un chameau'},
+ {c:'ح',n:'حاء',t:'ḥāʾ',  j:true,  sE:'a strong « h » from the throat', sF:'un « h » très soufflé, du fond de la gorge', w:'حصان', wt:'ḥiṣān', wf:'un cheval'},
+ {c:'خ',n:'خاء',t:'khāʾ', j:true,  sE:'« ch » as in the Scottish "loch"', sF:'« kh » raclé, comme la jota espagnole', w:'خبز', wt:'khubz', wf:'du pain'},
+ {c:'د',n:'دال',t:'dāl',  j:false, sE:'« d » as in "door"',           sF:'« d » comme dans « dos »',         w:'دب', wt:'dubb', wf:'un ours'},
+ {c:'ذ',n:'ذال',t:'dhāl', j:false, sE:'« th » as in "this"',          sF:'le « th » anglais de « this », sonore', w:'ذئب', wt:'dhiʾb', wf:'un loup'},
+ {c:'ر',n:'راء',t:'rāʾ',  j:false, sE:'a rolled « r », as in Spanish', sF:'un « r » roulé, comme en espagnol', w:'رجل', wt:'rajul', wf:'un homme'},
+ {c:'ز',n:'زاي',t:'zāy',  j:false, sE:'« z » as in "zoo"',            sF:'« z » comme dans « zéro »',        w:'زهرة', wt:'zahra', wf:'une fleur'},
+ {c:'س',n:'سين',t:'sīn',  j:true,  sE:'« s » as in "sun"',            sF:'« s » comme dans « sac »',         w:'سمك', wt:'samak', wf:'un poisson'},
+ {c:'ش',n:'شين',t:'shīn', j:true,  sE:'« sh » as in "ship"',          sF:'« ch » comme dans « chat »',       w:'شمس', wt:'shams', wf:'le soleil'},
+ {c:'ص',n:'صاد',t:'ṣād',  j:true,  sE:'a heavy « s », deeper than س', sF:'un « s » emphatique, plus lourd que س', w:'صديق', wt:'ṣadīq', wf:'un ami'},
+ {c:'ض',n:'ضاد',t:'ḍād',  j:true,  sE:'a heavy « d », deeper than د', sF:'un « d » emphatique, plus lourd que د', w:'ضفدع', wt:'ḍifdaʿ', wf:'une grenouille'},
+ {c:'ط',n:'طاء',t:'ṭāʾ',  j:true,  sE:'a heavy « t », deeper than ت', sF:'un « t » emphatique, plus lourd que ت', w:'طائر', wt:'ṭāʾir', wf:'un oiseau'},
+ {c:'ظ',n:'ظاء',t:'ẓāʾ',  j:true,  sE:'a heavy « th », deeper than ذ', sF:'un « dh » emphatique, plus lourd que ذ', w:'ظل', wt:'ẓill', wf:'une ombre'},
+ {c:'ع',n:'عين',t:'ʿayn', j:true,  sE:'a deep sound from the throat, no English equivalent', sF:'un son du fond de la gorge, sans équivalent en français', w:'عين', wt:'ʿayn', wf:'un œil'},
+ {c:'غ',n:'غين',t:'ghayn',j:true,  sE:'like the French « r » in "Paris"', sF:'le « r » grasseyé du français, comme dans « Paris »', w:'غابة', wt:'ghāba', wf:'une forêt'},
+ {c:'ف',n:'فاء',t:'fāʾ',  j:true,  sE:'« f » as in "fish"',           sF:'« f » comme dans « fleur »',       w:'فيل', wt:'fīl', wf:'un éléphant'},
+ {c:'ق',n:'قاف',t:'qāf',  j:true,  sE:'a « k » made deep in the throat', sF:'un « k » prononcé tout au fond de la gorge', w:'قمر', wt:'qamar', wf:'la lune'},
+ {c:'ك',n:'كاف',t:'kāf',  j:true,  sE:'« k » as in "kite"',           sF:'« k » comme dans « kilo »',        w:'كتاب', wt:'kitāb', wf:'un livre'},
+ {c:'ل',n:'لام',t:'lām',  j:true,  sE:'« l » as in "lion"',           sF:'« l » comme dans « lune »',        w:'ليمون', wt:'laymūn', wf:'un citron'},
+ {c:'م',n:'ميم',t:'mīm',  j:true,  sE:'« m » as in "moon"',           sF:'« m » comme dans « maman »',       w:'مدرسة', wt:'madrasa', wf:'une école'},
+ {c:'ن',n:'نون',t:'nūn',  j:true,  sE:'« n » as in "night"',          sF:'« n » comme dans « nuit »',        w:'نجم', wt:'najm', wf:'une étoile'},
+ {c:'ه',n:'هاء',t:'hāʾ',  j:true,  sE:'a light « h », as in "hat"',   sF:'un « h » aspiré léger, comme en anglais « hat »', w:'هدية', wt:'hadiyya', wf:'un cadeau'},
+ {c:'و',n:'واو',t:'wāw',  j:false, sE:'« w » as in "water", or a long « oo »', sF:'« w » comme dans « oui », ou un « ou » long', w:'وردة', wt:'warda', wf:'une rose'},
+ {c:'ي',n:'ياء',t:'yāʾ',  j:true,  sE:'« y » as in "yes", or a long « ee »', sF:'« y » comme dans « yoyo », ou un « i » long', w:'يد', wt:'yad', wf:'une main'}
+];
+
+/* le son en français, en très court, pour la grille */
+(function shortSounds(){
+  const P = { 'ا':'a long', 'ب':'b', 'ت':'t', 'ث':'th anglais', 'ج':'dj', 'ح':'h soufflé', 'خ':'kh raclé',
+              'د':'d', 'ذ':'dh sonore', 'ر':'r roulé', 'ز':'z', 'س':'s', 'ش':'ch', 'ص':'s lourd',
+              'ض':'d lourd', 'ط':'t lourd', 'ظ':'dh lourd', 'ع':'son de gorge', 'غ':'r grasseyé', 'ف':'f',
+              'ق':'k profond', 'ك':'k', 'ل':'l', 'م':'m', 'ن':'n', 'ه':'h léger', 'و':'w / ou', 'ي':'y / i' };
+  AR.forEach(L => { L.p = P[L.c] || ''; });
+})();
+
+const TW = 'ـ';                                   // tatweel : le trait de liaison
+const formIso = L => L.c;
+const formIni = L => L.j ? L.c + TW : null;
+const formMed = L => L.j ? TW + L.c + TW : null;
+const formFin = L => TW + L.c;
+
+/* prononciation par la synthèse vocale de la tablette */
+const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window;
+let VOICES = [];
+function refreshVoices(){ try{ VOICES = window.speechSynthesis.getVoices() || []; }catch(e){ VOICES = []; } }
+if(canSpeak){ refreshVoices(); try{ window.speechSynthesis.onvoiceschanged = refreshVoices; }catch(e){} }
+function pickVoice(lang){
+  if(!VOICES.length) refreshVoices();
+  const p = (lang||'').split('-')[0].toLowerCase();
+  return VOICES.find(v => v.lang && v.lang.toLowerCase().replace('_','-') === (lang||'').toLowerCase())
+      || VOICES.find(v => v.lang && v.lang.toLowerCase().startsWith(p)) || null;
+}
+/* iOS n'autorise la voix qu'après un premier geste de l'utilisateur */
+let audioReady = false;
+function unlockAudio(){
+  if(audioReady || !canSpeak) return;
+  try{ const u = new SpeechSynthesisUtterance(' '); u.volume = 0; window.speechSynthesis.speak(u); audioReady = true; }catch(e){}
+}
+document.addEventListener('pointerdown', unlockAudio, {once:true});
+
+/* say() prévient quand rien ne peut être prononcé */
+function say(txt, lang, onProblem){
+  const L = lang || 'ar-SA';
+  if(!canSpeak){ onProblem && onProblem("Cet appareil ne sait pas lire à voix haute."); return; }
+  refreshVoices(); unlockAudio();
+  const v = pickVoice(L);
+  if(!VOICES.length){ onProblem && onProblem("Aucune voix n'est encore chargée. Réessaie dans deux secondes."); }
+  else if(!v){
+    const nom = L.startsWith('ar') ? 'arabe' : L.startsWith('en') ? 'anglaise' : 'française';
+    onProblem && onProblem("Aucune voix "+nom+" sur cet appareil. Sur iPad : Réglages › Accessibilité › Contenu énoncé › Voix, puis télécharge la voix "+nom+".");
+  }
+  try{
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = L; u.rate = 0.75; if(v) u.voice = v;
+    u.onerror = () => onProblem && onProblem("La lecture a été interrompue. Vérifie le volume et le mode silencieux.");
+    window.speechSynthesis.cancel(); window.speechSynthesis.resume(); window.speechSynthesis.speak(u);
+  }catch(e){ onProblem && onProblem("La lecture n'a pas pu démarrer."); }
+}
+
+
+/* ---- la phrase du jour : elle change chaque jour, en trois langues ---- */
+const QUOTES = [
+ {en:"Believe in yourself and everything becomes possible.", fr:"Crois en toi et tout devient possible.", ar:"ثِقْ بِنَفْسِكَ وَكُلُّ شَيْءٍ يُصْبِحُ مُمْكِنًا"},
+ {en:"Every expert was once a beginner.", fr:"Chaque expert a d'abord été un débutant.", ar:"كُلُّ خَبِيرٍ كَانَ يَوْمًا مُبْتَدِئًا"},
+ {en:"Mistakes are proof that you are trying.", fr:"Les erreurs prouvent que tu essaies.", ar:"الأَخْطَاءُ دَلِيلٌ عَلَى أَنَّكَ تُحَاوِل"},
+ {en:"A little every day beats a lot once in a while.", fr:"Un peu chaque jour vaut mieux que beaucoup de temps en temps.", ar:"قَلِيلٌ دَائِمٌ خَيْرٌ مِنْ كَثِيرٍ مُنْقَطِع"},
+ {en:"You are braver than you believe.", fr:"Tu es plus courageux que tu ne le crois.", ar:"أَنْتَ أَشْجَعُ مِمَّا تَظُنّ"},
+ {en:"Learning a language opens a new door.", fr:"Apprendre une langue ouvre une nouvelle porte.", ar:"تَعَلُّمُ لُغَةٍ يَفْتَحُ بَابًا جَدِيدًا"},
+ {en:"Slow progress is still progress.", fr:"Avancer lentement, c'est avancer quand même.", ar:"التَّقَدُّمُ البَطِيءُ تَقَدُّمٌ أَيْضًا"},
+ {en:"Ask questions — that is how you grow.", fr:"Pose des questions, c'est comme ça qu'on grandit.", ar:"اِسْأَلْ دَائِمًا، هَكَذَا تَكْبُر"},
+ {en:"Your brain is a muscle: train it.", fr:"Ton cerveau est un muscle : entraîne-le.", ar:"عَقْلُكَ عَضَلَةٌ فَدَرِّبْهَا"},
+ {en:"Be patient with yourself.", fr:"Sois patient avec toi-même.", ar:"كُنْ صَبُورًا مَعَ نَفْسِك"},
+ {en:"Today you know something you did not know yesterday.", fr:"Aujourd'hui tu sais quelque chose que tu ignorais hier.", ar:"اليَوْمَ تَعْرِفُ مَا لَمْ تَكُنْ تَعْرِفُهُ أَمْس"},
+ {en:"Hard work beats talent.", fr:"Le travail vaut mieux que le talent.", ar:"الاِجْتِهَادُ أَقْوَى مِنَ المَوْهِبَة"},
+ {en:"Do not be afraid of being wrong.", fr:"N'aie pas peur de te tromper.", ar:"لَا تَخَفْ مِنَ الخَطَأ"},
+ {en:"One step at a time.", fr:"Une étape à la fois.", ar:"خُطْوَةً خُطْوَة"},
+ {en:"You can do hard things.", fr:"Tu es capable de faire des choses difficiles.", ar:"أَنْتَ قَادِرٌ عَلَى الأُمُورِ الصَّعْبَة"},
+ {en:"Practice makes progress.", fr:"C'est en s'entraînant qu'on progresse.", ar:"بِالتَّدْرِيبِ يَأْتِي التَّقَدُّم"},
+ {en:"Curiosity is a superpower.", fr:"La curiosité est un super-pouvoir.", ar:"الفُضُولُ قُوَّةٌ عَظِيمَة"},
+ {en:"Finish what you start.", fr:"Termine ce que tu commences.", ar:"أَتْمِمْ مَا بَدَأْت"},
+ {en:"Knowledge is light.", fr:"Le savoir est une lumière.", ar:"العِلْمُ نُورٌ"},
+ {en:"Keep going — you are closer than you think.", fr:"Continue, tu es plus près que tu ne le penses.", ar:"وَاصِلْ، أَنْتَ أَقْرَبُ مِمَّا تَظُنّ"}
+];
+const quoteOfDay = () => QUOTES[Math.floor(Date.now()/864e5) % QUOTES.length];
+const subIcon = n => n.indexOf('Arabic')>=0 ? '✨' : n.indexOf('English')>=0 ? '📖'
+                   : n.indexOf('Maths')>=0 ? '🔢' : n.indexOf('My chapters')>=0 ? '💛' : '📘';
+
+/* ---------------- écran : la grille des 28 lettres ---------------- */
+function alphabet(){
+  const v = DATA[S.kid];
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Chapters</button>
+    <span class="who" style="background:${v.hex}">The 28 letters</span></div>
+  <div class="card" style="padding:16px;">
+    <p style="margin:0; font-size:14px;">${T("Tap a letter to see its name, its sound and its four written forms.","Touche une lettre pour voir son nom, son son et ses quatre formes d'écriture.")}</p>
+    <p style="margin:6px 0 0; font-size:13px;" class="fr">L'arabe s'écrit et se lit <b>de droite à gauche</b>. Les lettres changent de forme selon leur place dans le mot.</p>
+    <div class="argrid">
+      ${AR.map((L,i)=>`<button data-l="${i}"><div class="g">${L.c}</div><div class="n">${L.t}</div><div class="p">${L.p}</div></button>`).join('')}
+    </div>
+  </div>
+  <p class="foot">${AR.filter(x=>!x.j).length} lettres ne se lient jamais à la lettre suivante : ${AR.filter(x=>!x.j).map(x=>x.c).join(' ')}</p>`;
+  document.getElementById('bk').onclick = ()=>menu(S.kid);
+  document.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>letterCard(+b.dataset.l));
+}
+
+/* ---------------- écran : une lettre en détail ---------------- */
+function letterCard(i){
+  const v = DATA[S.kid], L = AR[i];
+  const cell = (f, en, fr) => `<div>${f ? `<div class="f">${f}</div>` : `<div class="none">—</div>`}
+    <div class="lab">${en}<br><span class="fr" style="font-size:10.5px">${fr}</span></div></div>`;
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Letters</button>
+    <span class="who" style="background:${v.hex}">${L.t} · ${i+1}/28</span></div>
+  <div class="card" style="padding:18px 16px; text-align:center;">
+    <div class="arbig" style="font-size:88px;">${L.c}</div>
+    <h2 style="font-size:24px; margin-top:2px;">${L.t} <span class="ar">${L.n}</span></h2>
+    <p style="font-size:14px; margin:6px 0 0;">${L.sE}</p>
+    <p style="font-size:15px; margin:4px 0 0; font-weight:700;" class="fr">son : ${L.p}</p>
+    <p style="font-size:14px; margin:2px 0 0;" class="fr">${L.sF}</p>
+    <div id="vwarn"></div>
+    ${canSpeak?`<button class="speak" id="sp" style="margin-top:10px;">🔊 ${T("Listen","Écouter")}</button>`:
+      `<p style="font-size:12px; color:var(--ink-soft); margin-top:8px;">La lecture à voix haute n'est pas disponible sur cet appareil.</p>`}
+  </div>
+
+  <div class="card" style="padding:18px 16px; margin-top:14px;">
+    <h3 style="font-size:17px;">${T("The four forms","Les quatre formes")}</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:2px 0 0;">${T("The little line shows where the letter joins its neighbour.","Le petit trait montre où la lettre s'accroche à sa voisine.")}</p>
+    <div class="forms">
+      ${cell(formIso(L),'On its own','Isolée')}
+      ${cell(formIni(L),'Beginning','Début de mot')}
+      ${cell(formMed(L),'Middle','Milieu de mot')}
+      ${cell(formFin(L),'End','Fin de mot')}
+    </div>
+    ${!L.j?`<p style="font-size:13px; margin-top:10px; color:var(--red)"><b>Attention :</b> cette lettre ne se lie <b>jamais</b> à la lettre suivante. Elle n'a donc pas de forme du début ni du milieu, et le mot se coupe juste après elle.</p>`:''}
+  </div>
+
+  <div class="card" style="padding:18px 16px; margin-top:14px; text-align:center;">
+    <h3 style="font-size:17px;">${T("Example word","Un mot exemple")}</h3>
+    <div class="arbig" style="font-size:56px;">${L.w}</div>
+    <p style="font-size:15px; margin:2px 0 0;"><b>${L.wt}</b> — <span class="fr">${L.wf}</span></p>
+    ${canSpeak?`<button class="speak" id="spw" style="margin-top:8px;">🔊 ${T("Listen to the word","Écouter le mot")}</button>`:''}
+  </div>
+
+  <div style="display:flex; gap:10px; margin-top:14px;">
+    <button class="cta ghost" id="prev" style="flex:1">← ${T("Previous","Précédente")}</button>
+    <button class="cta" id="next" style="flex:1; background:${v.hex}">${T("Next","Suivante")} →</button>
+  </div>`;
+  document.getElementById('bk').onclick = alphabet;
+  document.getElementById('prev').onclick = ()=>letterCard((i+27)%28);
+  document.getElementById('next').onclick = ()=>letterCard((i+1)%28);
+  const warn = m => { const el = document.getElementById('vwarn'); if(el) el.innerHTML = `<p style="font-size:12px; color:var(--red); margin:8px 0 0;">${m}</p>`; };
+  const sp = document.getElementById('sp'); if(sp) sp.onclick = ()=>say(L.n,'ar-SA',warn);
+  const sw = document.getElementById('spw'); if(sw) sw.onclick = ()=>say(L.w,'ar-SA',warn);
+}
+
+/* ---------------- génération des chapitres d'exercices ---------------- */
+(function buildArabic(){
+  const shuffle = a => a.slice().sort(()=>Math.random()-0.5);
+  const others = (i, n) => shuffle(AR.filter((_,k)=>k!==i)).slice(0,n);
+  const mcq = (qEn, qFr, good, distractors, e) => {
+    const opts = shuffle([good].concat(distractors));
+    return { t:'choice', q:qEn, fr:qFr, c:opts, a:opts.indexOf(good), e };
+  };
+
+  // 1 à 4 : reconnaître le nom de la lettre, 7 par chapitre
+  const nameSets = [];
+  for(let g=0; g<4; g++){
+    const part = AR.slice(g*7, g*7+7);
+    nameSets.push({
+      id:'ar-name'+(g+1),
+      title:`Letter names (${g+1}/4)`, titleFr:`Le nom des lettres (${g+1}/4)`,
+      sub:`Letters ${part[0].t} to ${part[6].t}`, subFr:`De ${part[0].t} à ${part[6].t}`,
+      qs: part.map(L=>{ const i = AR.indexOf(L);
+        return mcq(`What is this letter called? <span class="arbig">${L.c}</span>`,
+                   `Comment s'appelle cette lettre ?`,
+                   L.t, others(i,3).map(x=>x.t),
+                   `C'est <b>${L.t}</b> (<span class="ar">${L.n}</span>) : ${L.sF}. Exemple : <span class="ar">${L.w}</span> = ${L.wf}.`);
+      })
+    });
+  }
+
+  // 5 : le son de la lettre
+  const soundPick = shuffle(AR).slice(0,10);
+  const soundSet = { id:'ar-sound', title:'The sound of the letters', titleFr:'Le son des lettres',
+    sub:'Which letter makes this sound?', subFr:'Quelle lettre fait ce son ?',
+    qs: soundPick.map(L=>{ const i = AR.indexOf(L);
+      return mcq(`Which letter is pronounced like this: ${L.sE}?`,
+                 `Quelle lettre se prononce ainsi : ${L.sF} ?`,
+                 `<span class="ar" style="font-size:30px">${L.c}</span>`,
+                 others(i,3).map(x=>`<span class="ar" style="font-size:30px">${x.c}</span>`),
+                 `C'est <b>${L.t}</b> <span class="ar">${L.c}</span> : ${L.sF}.`);
+    })};
+
+  // 6 : reconnaître la place dans le mot
+  const joiners = AR.filter(x=>x.j);
+  const posList = [['Beginning of a word','au début du mot',formIni],
+                   ['Middle of a word','au milieu du mot',formMed],
+                   ['End of a word','à la fin du mot',formFin],
+                   ['On its own','toute seule',formIso]];
+  const formSet = { id:'ar-forms', title:'Where is the letter?', titleFr:'Où est la lettre ?',
+    sub:'Beginning, middle, end or on its own', subFr:'Début, milieu, fin ou isolée',
+    qs: shuffle(joiners).slice(0,6).map(L=>{
+      const [en,fr,f] = posList[Math.floor(Math.random()*3)];
+      return mcq(`Where is this letter used? <span class="arbig">${f(L)}</span>`,
+                 `À quelle place cette lettre est-elle écrite ?`,
+                 en, posList.filter(x=>x[0]!==en).map(x=>x[0]),
+                 `Le trait de liaison montre la place : ${fr}. La forme isolée de cette lettre est <span class="ar">${L.c}</span> (${L.t}).`);
+    }).concat(shuffle(joiners).slice(0,4).map(L=>{
+      const k = Math.floor(Math.random()*3);
+      const [en,fr,f] = posList[k];
+      const good = f(L);
+      const bad = posList.filter((_,j)=>j!==k).map(x=>x[2](L));
+      return mcq(`Which one is <span class="ar">${L.c}</span> (${L.t}) ${en.toLowerCase()}?`,
+                 `Laquelle est la lettre ${L.t} ${fr} ?`,
+                 `<span class="ar" style="font-size:30px">${good}</span>`,
+                 bad.map(b=>`<span class="ar" style="font-size:30px">${b}</span>`),
+                 `${L.t} ${fr} s'écrit <span class="ar">${good}</span>.`);
+    }))};
+
+  // 7 : les lettres qui ne se lient pas
+  const nonJ = AR.filter(x=>!x.j);
+  const joinSet = { id:'ar-join', title:'Letters that never join', titleFr:'Les lettres qui ne se lient pas',
+    sub:'ا د ذ ر ز و : they never join the next letter', subFr:'ا د ذ ر ز و : elles ne s\'attachent jamais à la suivante',
+    qs: shuffle(nonJ).map(L=>{ const i = AR.indexOf(L);
+      return mcq(`Which of these letters never joins the letter that follows it?`,
+                 `Laquelle de ces lettres ne s'attache jamais à la lettre suivante ?`,
+                 `<span class="ar" style="font-size:30px">${L.c}</span>`,
+                 shuffle(joiners).slice(0,3).map(x=>`<span class="ar" style="font-size:30px">${x.c}</span>`),
+                 `<b>${L.t}</b> <span class="ar">${L.c}</span> fait partie des six lettres ا د ذ ر ز و : après elles, le mot se coupe.`);
+    }).concat([
+      mcq(`How many letters are there in the Arabic alphabet?`, `Combien de lettres compte l'alphabet arabe ?`,
+          '28', ['26','24','30'], `L'alphabet arabe compte <b>28</b> lettres.`),
+      mcq(`In which direction do you read and write Arabic?`, `Dans quel sens lit-on et écrit-on l'arabe ?`,
+          'From right to left', ['From left to right','From top to bottom','Both directions'],
+          `L'arabe se lit et s'écrit <b>de droite à gauche</b>.`)
+    ])};
+
+  const sets = [{ id:'ar-learn', learn:true, qs:[],
+      title:'The 28 letters', titleFr:'Les 28 lettres',
+      sub:'Name, sound and the four forms', subFr:'Le nom, le son et les quatre formes' }]
+    .concat(nameSets, [soundSet, formSet, joinSet]);
+
+  for(const kid of ['lina','ilyes']){
+    DATA[kid].subjects.push({ name:'العربية — Arabic',
+      note:'The alphabet: letters, sounds and written forms',
+      noteFr:'L\'alphabet : les lettres, les sons et les formes d\'écriture',
+      sets: JSON.parse(JSON.stringify(sets)) });
+  }
+})();
+
+/* ---- texte anglais + traduction française au clic sur le i ---- */
+function T(en, fr){
+  if(!fr) return en;
+  return `<span class="tt">${en}<span class="i" role="button" tabindex="0">i</span><span class="frx">${fr}</span></span>`;
+}
+document.addEventListener('click', e=>{
+  const b = e.target && e.target.closest ? e.target.closest('.i') : null;
+  if(!b) return;
+  e.stopPropagation(); e.preventDefault();
+  const tt = b.closest('.tt'); if(tt) tt.classList.toggle('open');
+}, true);
+
+const BRAVO = [["Well done!","Bravo !"],["Perfect!","Parfait !"],["Excellent!","Excellent !"],["That's right!","C'est juste !"],
+               ["Great work!","Beau travail !"],["Brilliant!","Super !"],["Spot on!","Pile poil !"],["Very good!","Très bien !"]];
+const RETRY = [["Almost — try again.","Presque… réessaie."],["Not quite. Read the hint.","Pas tout à fait. Regarde l'indice."],
+               ["Try once more, you are close.","Essaie encore, tu y es presque."],["No, but you can find it.","Non, mais tu peux le retrouver."]];
+const pick = a => a[Math.floor(Math.random()*a.length)];
+
+/* ============================================================ STOCKAGE */
+/* ───────── CONFIGURATION — à remplir seulement si tu héberges ce fichier toi-même.
+   Laisse vide et tout reste enregistré sur l'appareil (et dans l'artefact Claude).
+   Rempli, les résultats se synchronisent entre la tablette et ton téléphone. ───────── */
+let SYNC = {
+  url : "",          // ex. JSONBin : https://api.jsonbin.io/v3/b/TON_ID
+  key : "",          // ex. JSONBin : ta clé X-Master-Key
+  mode: "jsonbin"    // "jsonbin"  ou  "raw" (une API à toi qui accepte GET et PUT)
+};
+/* les réglages saisis dans l'Espace parent prennent le dessus sur le bloc ci-dessus */
+function loadSyncSettings(){
+  try{ const raw = localStorage.getItem('cahier-sync');
+       if(raw){ const o = JSON.parse(raw); if(o && o.url) SYNC = Object.assign({mode:'jsonbin'}, o); } }catch(e){}
+}
+function saveSyncSettings(o){
+  SYNC = Object.assign({mode:'jsonbin'}, o);
+  try{ localStorage.setItem('cahier-sync', JSON.stringify(SYNC)); }catch(e){}
+}
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+let DB = {};                       // toutes les données, en un seul objet
+let syncState = SYNC.url ? '…' : 'local';
+let syncError = '';
+const hasArtifact = (()=>{ try{ return !!(window.storage && window.storage.get); }catch(e){ return false; } })();
+const hasLS = (()=>{ try{ const k='_cahier_t'; window.localStorage.setItem(k,'1'); window.localStorage.removeItem(k); return true; }catch(e){ return false; } })();
+
+/* les photos restent sur l'appareil : elles alourdissent l'envoi et n'ont rien à faire sur un serveur tiers */
+function forRemote(db){
+  const out = {};
+  for(const k in db) if(k.indexOf(':photo:') < 0) out[k] = db[k];
+  return out;
+}
+const canZip = (typeof CompressionStream === 'function');
+async function zip(str){
+  const st = new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'));
+  const buf = await new Response(st).arrayBuffer();
+  let bin = ''; const a = new Uint8Array(buf);
+  for(let i=0;i<a.length;i++) bin += String.fromCharCode(a[i]);
+  return btoa(bin);
+}
+async function unzip(b64){
+  const bin = atob(b64), a = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) a[i] = bin.charCodeAt(i);
+  const st = new Blob([a]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return await new Response(st).text();
+}
+let lastSize = { brut:0, envoye:0 };
+let lastPullAt = 0, lastPushAt = 0;
+
+async function remoteGet(){
+  const u = SYNC.mode==='jsonbin' ? SYNC.url.replace(/\/$/,'')+'/latest' : SYNC.url;
+  const h = SYNC.mode==='jsonbin' ? {'X-Master-Key':SYNC.key,'X-Bin-Meta':'false'}
+                                  : (SYNC.key ? {'Authorization':'Bearer '+SYNC.key} : {});
+  const r = await fetch(u,{headers:h});
+  if(!r.ok) throw new Error('GET '+r.status);
+  const j = await r.json();
+  const o = (j && j.record) ? j.record : j;
+  if(o && typeof o.z === 'string'){ try{ return JSON.parse(await unzip(o.z)); }catch(e){ return {}; } }
+  return o;
+}
+async function remotePut(obj){
+  const h = Object.assign({'Content-Type':'application/json'},
+    SYNC.mode==='jsonbin' ? {'X-Master-Key':SYNC.key} : (SYNC.key ? {'Authorization':'Bearer '+SYNC.key} : {}));
+  const clair = JSON.stringify(forRemote(obj));
+  let body = clair;
+  if(canZip){ try{ body = JSON.stringify({ z: await zip(clair) }); }catch(e){} }
+  lastSize = { brut: Math.round(clair.length/1024), envoye: Math.round(body.length/1024) };
+  const r = await fetch(SYNC.url,{method:'PUT',headers:h,body});
+  if(!r.ok){
+    const txt = await r.text().catch(()=> '');
+    throw new Error('PUT ' + r.status + (r.status===400||r.status===413 ? ' — fichier trop gros ('+lastSize.envoye+' Ko)' : '') + ' ' + txt.slice(0,120));
+  }
+}
+async function dbLoad(){
+  if(hasLS){ try{ DB = JSON.parse(localStorage.getItem('cahier-db')||'{}'); }catch(e){ DB = {}; } }
+  if(hasArtifact){ try{ const r = await window.storage.get('cahier-db', true); if(r) DB = mergeDB(DB, JSON.parse(r.value)); }catch(e){} }
+  if(SYNC.url){ try{ const rem = await remoteGet(); if(rem && typeof rem==='object') DB = mergeDB(DB, rem); syncState='ok'; }
+                catch(e){ syncState='hors ligne'; } }
+}
+/* fusion : on ne perd jamais le travail d'un appareil au profit d'un autre */
+function mergeDB(a, b){                 // b (distant) fusionné dans a (local)
+  const out = Object.assign({}, a);
+  for(const k in b){
+    const B = b[k], A = out[k];
+    if(A === undefined || A === null){ out[k] = B; continue; }
+    if(k.indexOf(':hist:') > 0 && Array.isArray(A) && Array.isArray(B)){
+      const seen = new Set(), all = A.concat(B).sort((x,y)=>x.ts-y.ts)
+        .filter(h => { const id = h.ts+'|'+h.set; if(seen.has(id)) return false; seen.add(id); return true; });
+      out[k] = all.slice(-400);
+    } else if(k.indexOf(':prog:') > 0 && typeof A === 'object' && typeof B === 'object'){
+      const m = Object.assign({}, A);
+      for(const id in B){
+        const x = A[id], y = B[id];
+        if(!x){ m[id] = y; continue; }
+        m[id] = { total: y.total || x.total,
+                  best : Math.max(x.best||0, y.best||0),
+                  tries: Math.max(x.tries||0, y.tries||0),
+                  last : (new Date(y.lastAt||0) > new Date(x.lastAt||0)) ? y.last : x.last,
+                  lastAt: (new Date(y.lastAt||0) > new Date(x.lastAt||0)) ? y.lastAt : x.lastAt };
+      }
+      out[k] = m;
+    } else if(k.indexOf(':sets:') > 0 && Array.isArray(A) && Array.isArray(B)){
+      const ids = new Set(A.map(x=>x.id));
+      out[k] = A.concat(B.filter(x=>!ids.has(x.id)));
+    } else if(k.indexOf('_t:') === 0){
+      out[k] = Math.max(A||0, B||0);
+    } else if(k === 'cahier:code'){
+      out[k] = A && A !== 'famille' ? A : B;
+    } else {
+      const ta = a['_t:'+k] || 0, tb = b['_t:'+k] || 0;   // la modification la plus récente gagne
+      out[k] = (tb >= ta) ? B : A;
+    }
+  }
+  return out;
+}
+let saveTimer = null;
+async function dbSave(){
+  if(hasLS){ try{ localStorage.setItem('cahier-db', JSON.stringify(DB)); }catch(e){} }
+  if(hasArtifact){ try{ await window.storage.set('cahier-db', JSON.stringify(DB), true); }catch(e){} }
+  if(SYNC.url){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async ()=>{
+      try{ let rem = {}; try{ rem = await remoteGet() || {}; }catch(e){}
+           DB = mergeDB(DB, rem);
+           await remotePut(DB); syncState='ok'; syncError=''; lastPushAt = Date.now(); }
+      catch(e){ syncState='écriture refusée'; syncError = (e && e.message) || String(e); }
+    }, 800);
+  }
+}
+/* va rechercher les nouveautés sur le serveur (tâches, chapitres, cagnotte) */
+let lastPull = 0;
+async function pullRemote(force){
+  if(!SYNC.url) return false;
+  if(!force && Date.now() - lastPull < 20000) return false;   // pas plus d'une fois toutes les 20 s
+  try{
+    const rem = await remoteGet();
+    if(rem && typeof rem === 'object'){ DB = mergeDB(DB, rem); syncState = 'ok'; }
+    lastPull = Date.now(); lastPullAt = Date.now();
+    if(hasLS){ try{ localStorage.setItem('cahier-db', JSON.stringify(DB)); }catch(e){} }
+    return true;
+  }catch(e){ syncState = 'hors ligne'; return false; }
+}
+/* journal des échanges avec le serveur, pour savoir ce qui se passe vraiment */
+let SYNCLOG = [];
+function logSync(what, ok, msg){
+  SYNCLOG.push({ t:Date.now(), what, ok, msg: (msg||'').toString().slice(0,140) });
+  while(SYNCLOG.length > 8) SYNCLOG.shift();
+}
+/* envoi immédiat, sans attendre : pour tout ce qui doit arriver sur les autres appareils */
+async function pushNow(label){
+  if(!SYNC.url){ logSync(label, false, "aucun serveur configuré sur cet appareil"); return false; }
+  try{
+    let rem = {}; try{ rem = await remoteGet() || {}; }catch(e){ logSync(label+' (lecture)', false, e.message); }
+    DB = mergeDB(DB, rem);
+    await remotePut(DB);
+    syncState = 'ok'; syncError = ''; lastPushAt = Date.now();
+    logSync(label, true, lastSize.envoye + ' Ko envoyés');
+    return true;
+  }catch(e){
+    syncState = 'écriture refusée'; syncError = (e && e.message) || String(e);
+    logSync(label, false, syncError);
+    return false;
+  }
+}
+const store = {
+  async get(k){ return (k in DB) ? DB[k] : null; },
+  async set(k, v){ DB[k] = v; DB['_t:'+k] = Date.now(); await dbSave(); }
+};
+
+/* code famille : sépare les données si plusieurs familles utilisent le même lien */
+let CODE = 'famille';
+const K = { prog: k => `c:${CODE}:prog:${k}`, hist: k => `c:${CODE}:hist:${k}`,
+            sets: k => `c:${CODE}:sets:${k}`, photo: k => `c:${CODE}:photo:${k}`,
+            srs:  k => `c:${CODE}:srs:${k}`,
+            wallet: k => `c:${CODE}:wallet:${k}`, tasks: k => `c:${CODE}:tasks:${k}`,
+            reward: () => `c:${CODE}:reward` };
+
+let progress = {};
+let CUSTOM = { lina:[], ilyes:[] };
+let PHOTOS = { lina:null, ilyes:null };
+let SRS = {};                       // mémoire d'apprentissage : quand revoir chaque mot
+let WALLET = { lina:null, ilyes:null };   // cagnotte : solde + mouvements
+let TASKS  = { lina:[], ilyes:[] };       // tâches données par les parents
+let REWARD = { amount:5, minQ:20, minPct:70, cur:'DH' };
+const todayKey = () => { const n = new Date();
+  return new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+const money = n => (Math.round(n*100)/100) + ' ' + REWARD.cur;
+
+async function loadMoney(){
+  REWARD = Object.assign({ amount:5, minQ:20, minPct:70, cur:'DH' }, (await store.get(K.reward())) || {});
+  for(const k of ['lina','ilyes']){
+    WALLET[k] = (await store.get(K.wallet(k))) || { balance:0, tx:[] };
+    TASKS[k]  = (await store.get(K.tasks(k)))  || [];
+  }
+}
+async function credit(kid, label, amount, kind){
+  const w = WALLET[kid] || { balance:0, tx:[] };
+  w.balance = Math.round((w.balance + amount)*100)/100;
+  w.tx.push({ ts:Date.now(), d:todayKey(), label, amount, kind });
+  while(w.tx.length > 150) w.tx.shift();
+  WALLET[kid] = w;
+  await store.set(K.wallet(kid), w);
+  await pushNow('cagnotte de '+kid);
+}
+async function saveTasks(kid){ await store.set(K.tasks(kid), TASKS[kid]); await pushNow('tâches de '+kid); }
+
+/* le travail du jour : combien de questions, quel pourcentage */
+async function dayWork(kid){
+  const hist = (await store.get(K.hist(kid))) || [];
+  const t = todayKey();
+  const h = hist.filter(x => x.d === t);
+  const q = h.reduce((a,x)=>a+x.total, 0), sc = h.reduce((a,x)=>a+x.score, 0);
+  return { q, sc, pct: q ? Math.round(100*sc/q) : 0,
+           paid: (WALLET[kid] && WALLET[kid].tx || []).some(x => x.d === t && x.kind === 'day') };
+}
+async function checkDailyReward(kid){
+  const w = await dayWork(kid);
+  if(!w.paid && w.q >= REWARD.minQ && w.pct >= REWARD.minPct){
+    await credit(kid, "Travail du jour", REWARD.amount, 'day');
+    return true;
+  }
+  return false;
+}
+
+async function loadCode(){ CODE = (await store.get('cahier:code')) || 'famille'; }
+async function setCode(c){ CODE = (c||'famille').trim().toLowerCase(); await store.set('cahier:code', CODE); await loadCustom(); await loadMoney(); }
+async function loadCustom(){
+  for(const k of ['lina','ilyes']){ CUSTOM[k] = (await store.get(K.sets(k))) || []; PHOTOS[k] = (await store.get(K.photo(k))) || null; }
+}
+/* la photo est redimensionnée en petit carré : elle doit rester légère pour la synchro */
+function shrinkPhoto(file, size, cb){
+  const img = new Image();
+  img.onload = () => {
+    try{
+      const c = document.createElement('canvas'); c.width = size; c.height = size;
+      const x = c.getContext('2d');
+      const s = Math.min(img.width, img.height);
+      x.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, size, size);
+      cb(c.toDataURL('image/jpeg', 0.7));
+    }catch(e){ cb(null); }
+  };
+  img.onerror = () => cb(null);
+  const fr = new FileReader();
+  fr.onload = () => { img.src = fr.result; };
+  fr.onerror = () => cb(null);
+  fr.readAsDataURL(file);
+}
+async function saveCustom(kid){ await store.set(K.sets(kid), CUSTOM[kid]); await pushNow('chapitres de '+kid); }
+async function loadProgress(kid){
+  progress = (await store.get(K.prog(kid))) || {};
+  SRS = (await store.get(K.srs(kid))) || {};
+}
+/* ---- entraînement quotidien : nouveaux mots + révisions espacées ---- */
+const hashQ = t => { let h = 5381; const x = (t||'').replace(/<[^>]+>/g,''); 
+  for(let i=0;i<x.length;i++) h = ((h*33) ^ x.charCodeAt(i)) >>> 0; return h.toString(36); };
+const STEPS = [1, 2, 4, 8, 16, 30];     // en jours
+function srsUpdate(k, ok){
+  const r = SRS[k] || { s:0, n:0, w:0 };
+  if(ok){ r.s = (r.s||0)+1; r.n = (r.n||0)+1; } else { r.s = 0; r.w = (r.w||0)+1; }
+  r.due  = Date.now() + (ok ? STEPS[Math.min(r.s, STEPS.length-1)] : 1) * 864e5;
+  r.last = Date.now();
+  SRS[k] = r;
+}
+function dailyStats(st){
+  const items = st.qs.map(q=>hashQ(q.q));
+  const now = Date.now();
+  return { total: items.length,
+           appris: items.filter(k=>SRS[k] && SRS[k].s >= 3).length,
+           vus:    items.filter(k=>SRS[k]).length,
+           revoir: items.filter(k=>SRS[k] && SRS[k].due <= now).length,
+           neufs:  items.filter(k=>!SRS[k]).length };
+}
+function chooseDaily(st, n){
+  n = n || 12;
+  const now = Date.now();
+  const all = st.qs.map(q => ({ q, k: hashQ(q.q) }));
+  const due  = all.filter(x => SRS[x.k] && SRS[x.k].due <= now)
+                  .sort((a,b)=>SRS[a.k].due - SRS[b.k].due);
+  const neufs = all.filter(x => !SRS[x.k]);
+  const reste = all.filter(x => SRS[x.k] && SRS[x.k].due > now)
+                   .sort((a,b)=>SRS[a.k].due - SRS[b.k].due);
+  const revis = due.slice(0, Math.min(6, due.length));
+  let pick = revis.concat(neufs.slice(0, n - revis.length));
+  if(pick.length < n) pick = pick.concat(due.slice(revis.length, revis.length + (n-pick.length)));
+  if(pick.length < n) pick = pick.concat(reste.slice(0, n - pick.length));
+  pick = pick.sort(()=>Math.random()-0.5);
+  return pick.map(x => Object.assign({}, x.q, { _k:x.k }));
+}
+async function saveResult(kid, setId, title, score, total, wrong, detail){
+  const p = progress[setId] || { best:0, total:total, tries:0 };
+  const now = new Date();
+  p.total = total; p.tries = (p.tries||0)+1; p.last = score; p.lastAt = now.toISOString();
+  if(score > (p.best||0)) p.best = score;
+  progress[setId] = p;
+  await store.set(K.prog(kid), progress);
+  const hist = (await store.get(K.hist(kid))) || [];
+  hist.push({ d: new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,10),
+              ts: now.getTime(), set:setId, title, score, total,
+              w: (wrong||[]).slice(0,6).map(x=>x.slice(0,70)),
+              qs: (detail||[]).slice(0,25) });
+  while(hist.length > 200) hist.shift();
+  // le détail complet n'est gardé que pour les 30 dernières séances (poids du fichier)
+  hist.slice(0, Math.max(0, hist.length-30)).forEach(h => { delete h.qs; });
+  await store.set(K.hist(kid), hist);
+}
+const allSets = kid => {
+  const out = [];
+  DATA[kid].subjects.forEach(su => su.sets.forEach(st => out.push({su:su.name, st})));
+  (CUSTOM[kid]||[]).forEach(st => out.push({su: st.subject || 'My chapters', st}));
+  return out;
+};
+
+/* sauvegarde manuelle : un fichier .json que tu gardes où tu veux */
+function exportData(){
+  const blob = new Blob([JSON.stringify(DB,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cahier-sauvegarde-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function importData(file, done){
+  const fr = new FileReader();
+  fr.onload = async () => {
+    try{
+      const obj = JSON.parse(fr.result);
+      if(typeof obj !== 'object') throw 0;
+      DB = Object.assign(DB, obj);
+      await dbSave(); await loadCode(); await loadCustom();
+      done(true);
+    }catch(e){ done(false); }
+  };
+  fr.readAsText(file);
+}
+
+/* ============================================================ ÉTAT */
+let S = { kid:null, set:null, i:0, score:0, tries:0, mode:'key', picked:null, log:[] };
+const app = document.getElementById('app');
+const esc = s => s;
+
+/* ============================================================ ÉCRANS */
+function home(){
+  S.kid=null;
+  app.innerHTML = `
+  <div style="display:flex; justify-content:flex-end;">
+    <button class="back" id="par" style="font-size:13px; padding:7px 12px;">👩‍👧 Espace parent</button>
+  </div>
+  <div class="hero" style="padding-top:6px;">
+    <h1>The Workbook</h1>
+    <p>${T("Choose your name to start.","Choisis ton prénom pour commencer.")}</p>
+  </div>
+  <div class="pick">
+    ${Object.entries(DATA).map(([k,v])=>`
+      <button class="card who-card" data-kid="${k}" style="border-color:${v.hex}">
+        <div class="tape"></div>
+        ${PHOTOS[k] ? `<img class="ava" src="${PHOTOS[k]}" style="width:88px; height:88px; border-color:${v.hex}; margin-bottom:10px;">` : ''}
+        <div class="label" style="color:${v.hex}">${v.name}</div>
+        ${v.ar?`<div class="ar" style="font-size:26px; color:${v.hex}; margin-top:2px; line-height:1.4;">${v.ar}</div>`:''}
+        <div class="yr">${v.year} · ${v.subjects.map(s=>s.name).join(' & ')}</div>
+        <div class="dots">${('<i style="background:'+v.hex+'"></i>').repeat(3)}</div>
+      </button>`).join('')}
+  </div>
+  <p class="foot">${T("Type your answers or write them with your finger. Everything is marked straight away.","Écris tes réponses au clavier ou au doigt. Tout est corrigé tout de suite.")}
+  <br><span style="font-size:11px; color:#B9B3A2;">${VERSION}</span></p>`;
+  document.querySelectorAll('[data-kid]').forEach(b=>b.onclick=()=>menu(b.dataset.kid));
+  document.getElementById('par').onclick = parents;
+}
+
+async function menu(kid){
+  S.kid = kid;
+  await pullRemote();                      // récupère ce que les parents viennent d'ajouter
+  await loadProgress(kid); await loadCustom(); await loadMoney();
+  await checkDailyReward(kid);            // rattrape le travail déjà fait aujourd'hui
+  const v = DATA[kid], q = quoteOfDay();
+  const w = WALLET[kid] || { balance:0, tx:[] };
+  const dw = await dayWork(kid);
+  const todo = (TASKS[kid]||[]).filter(t => t.status === 'todo');
+  // on range chaque chapitre ajouté dans SA matière ; le reste va dans « My chapters »
+  const subs = v.subjects.map(su => Object.assign({}, su, { sets: su.sets.slice() }));
+  const norm = t => (t||'').toLowerCase().replace(/[^a-z]/g,'');
+  const orphelins = [];
+  (CUSTOM[kid]||[]).forEach(st => {
+    const cible = subs.find(su => norm(su.name) === norm(st.subject)
+                               || (norm(st.subject) && norm(su.name).indexOf(norm(st.subject)) >= 0)
+                               || (norm(st.subject) && norm(st.subject).indexOf(norm(su.name)) >= 0));
+    if(cible) cible.sets.push(st); else orphelins.push(st);
+  });
+  // une matière qui n'existe pas encore chez cet enfant est créée pour lui
+  const parMatiere = {};
+  orphelins.forEach(st => {
+    const nom = (st.subject || '').trim() || 'My chapters';
+    (parMatiere[nom] = parMatiere[nom] || []).push(st);
+  });
+  Object.keys(parMatiere).forEach(nom => subs.push({
+    name: nom,
+    note: nom==='My chapters' ? 'Chapters added by your parent' : 'Chapters added by your parent',
+    noteFr: nom==='My chapters' ? 'Les chapitres ajoutés par tes parents' : 'Ajouté par tes parents',
+    sets: parMatiere[nom]
+  }));
+
+  const card = (su, i) => {
+    const sets = su.sets.filter(st=>!st.learn);
+    const done = sets.filter(st=>progress[st.id]);
+    const mastered = sets.filter(st=>{
+      const p = progress[st.id];
+      if(st.daily){ const d = dailyStats(st); return d.appris/d.total >= 0.7; }
+      return p && p.best/p.total >= 0.7; });
+    const neuf = su.sets.filter(st=>st.custom && !progress[st.id]).length;
+    const pct = sets.length ? Math.round(100*mastered.length/sets.length) : 0;
+    let msg, col = v.hex;
+    if(neuf)                    { msg = `✨ ${neuf} nouveau${neuf>1?'x':''} chapitre${neuf>1?'s':''} à faire ici !`; col = 'var(--amber)'; }
+    else if(!done.length)       { msg = "On commence ? / Shall we start?"; col = 'var(--ink-soft)'; }
+    else if(pct === 100)        { msg = "Tout est maîtrisé, bravo ! 🎉"; col = 'var(--green)'; }
+    else if(pct >= 60)          { msg = "Tu y es presque, continue ! 💪"; col = 'var(--green)'; }
+    else if(pct >= 30)          { msg = "Belle progression, continue ! ⭐"; col = v.hex; }
+    else                        { msg = "C'est en s'entraînant qu'on y arrive ! 🌱"; col = 'var(--amber)'; }
+    return `<button class="card subcard" data-su="${i}" style="border-color:${v.hex}">
+      <span class="ic" style="background:${v.hex}">${subIcon(su.name)}</span>
+      <span class="bd">
+        <span class="ti">${su.name}${neuf?`<span class="newbadge">✨ ${neuf} nouveau${neuf>1?'x':''}</span>`:''}</span>
+        <span class="st">${T(su.note||'', su.noteFr||'')}</span>
+        <span class="st">${su.sets.length} chapitre(s) · ${mastered.length} maîtrisé(s) sur ${sets.length}</span>
+        <span class="barw"><i style="width:${Math.max(pct,3)}%; background:${v.hex}"></i></span>
+        <span class="msg" style="color:${col}">${msg}</span>
+      </span>
+      <span style="font-size:22px; color:${v.hex}">›</span>
+    </button>`;
+  };
+
+  app.innerHTML = `
+  <div class="bar">
+    <button class="back" id="bk">← Names</button>
+    <span class="who" style="background:${v.hex}">${v.name} · ${v.year}</span>
+  </div>
+  ${!SYNC.url ? `<div class="card" style="padding:12px 14px; margin-bottom:12px; border-color:var(--red); background:#FEF2F2;">
+      <b style="color:var(--red); font-size:14px;">⚠ Cet appareil n'est pas relié</b>
+      <div style="font-size:12.5px; margin-top:3px;">Les nouveaux chapitres et les tâches de tes parents n'arriveront pas ici.
+      Montre ce message à un adulte : Espace parent → Synchronisation.</div></div>`
+    : (syncState !== 'ok' ? `<div class="card" style="padding:12px 14px; margin-bottom:12px; border-color:var(--amber); background:#FFFBEB;">
+      <b style="color:#B45309; font-size:14px;">Connexion au serveur impossible</b>
+      <div style="font-size:12.5px; margin-top:3px;">L'appareil travaille hors ligne (${syncState}). Les nouveautés arriveront au retour du réseau.</div></div>` : '')}
+  <div class="quote">
+    <div class="en">${q.en}</div>
+    <div class="fr">${q.fr}</div>
+    <div class="arq">${q.ar}</div>
+  </div>
+  <p style="font-size:12.5px; color:var(--ink-soft); text-align:center; margin:6px 0 14px;">
+    ${T("A new sentence every day.","Une nouvelle phrase chaque jour.")}</p>
+  <button class="card wallet" id="wal" style="border-color:#E08A00">
+    <span class="coin">💰</span>
+    <span style="flex:1">
+      <span class="amt">${money(w.balance||0)}</span>
+      <span style="display:block; font-size:12.5px; color:var(--ink-soft); margin-top:2px;">${T("My piggy bank","Ma cagnotte")}</span>
+      <span style="display:block; font-size:12.5px; font-weight:700; color:${dw.paid?'var(--green)':'var(--ink-soft)'}; margin-top:4px;">
+        ${dw.paid ? `✓ ${T("Today's reward earned!","Récompense du jour gagnée !")} +${money(REWARD.amount)}`
+        : `${T("Today","Aujourd'hui")} : ${dw.q}/${REWARD.minQ} questions · ${dw.pct}% ${dw.q>=REWARD.minQ&&dw.pct<REWARD.minPct?`(il faut ${REWARD.minPct}%)`:''}`}
+      </span>
+    </span>
+    ${todo.length?`<span class="badge-wait">${todo.length} tâche(s)</span>`:''}
+    <span style="font-size:22px; color:#E08A00">›</span>
+  </button>
+  ${subs.map(card).join('')}
+  <p class="foot">${T("Pick a subject, then a chapter.","Choisis une matière, puis un chapitre.")}</p>`;
+  document.getElementById('bk').onclick = home;
+  document.getElementById('wal').onclick = ()=>walletView(kid);
+  document.querySelectorAll('[data-su]').forEach(b=>b.onclick=()=>subjectView(kid, +b.dataset.su, subs));
+}
+
+/* l'écran de la cagnotte, côté enfant */
+async function walletView(kid, forcer){
+  const v = DATA[kid];
+  await pullRemote(forcer);
+  await loadMoney();
+  const justGagne = await checkDailyReward(kid);
+  const w = WALLET[kid] || { balance:0, tx:[] };
+  const dw = await dayWork(kid);
+  const ts = TASKS[kid] || [];
+  const todo = ts.filter(t=>t.status==='todo'), wait = ts.filter(t=>t.status==='pending');
+  const reste = Math.max(0, REWARD.minQ - dw.q);
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← ${T("Subjects","Matières")}</button>
+    <span class="who" style="background:${v.hex}">${T("My piggy bank","Ma cagnotte")}</span></div>
+
+  ${justGagne?`<div class="card" style="padding:14px; text-align:center; border-color:var(--green); background:#EAF7EF; margin-bottom:12px;">
+    <b style="color:var(--green); font-size:16px;">🎉 ${T("Reward earned!","Récompense du jour gagnée !")} +${money(REWARD.amount)}</b></div>`:''}
+  <div class="card" style="padding:22px 18px; text-align:center; border-color:#E08A00;">
+    <div style="font-size:44px;">💰</div>
+    <div style="font-family:'Baloo 2',sans-serif; font-size:44px; font-weight:700; color:#B45309; line-height:1.1;">${money(w.balance||0)}</div>
+    <p style="font-size:13px; color:var(--ink-soft); margin:4px 0 0;">${T("Everything you have earned","Tout ce que tu as gagné")}</p>
+    <button class="tool" id="refresh" style="margin-top:10px;">↻ ${T("Check for new tasks","Voir s'il y a du nouveau")}</button>
+  </div>
+
+  <div class="card" style="padding:16px; margin-top:14px; border-color:${dw.paid?'var(--green)':'var(--ink)'}">
+    <h3 style="font-family:'Baloo 2',sans-serif; font-size:18px;">${T("Today's reward","La récompense du jour")} · ${money(REWARD.amount)}</h3>
+    ${dw.paid ? `<p style="font-size:14px; color:var(--green); font-weight:700;">✓ ${T("Earned! Well done.","Gagnée ! Bravo.")}</p>`
+    : `<p style="font-size:13.5px; margin:4px 0;">${T("Answer","Réponds à")} <b>${REWARD.minQ}</b> questions ${T("with at least","avec au moins")} <b>${REWARD.minPct}%</b> ${T("correct","de réussite")}.</p>
+       <div class="prog" style="margin:8px 0 4px;"><i style="width:${Math.min(100,Math.round(100*dw.q/REWARD.minQ))}%; background:${v.hex}"></i></div>
+       <p style="font-size:13px; color:var(--ink-soft);">${dw.q} ${T("questions today","questions aujourd'hui")} · ${dw.pct}% ${T("correct","de réussite")}${reste?` · ${T("still","encore")} ${reste} !`:''}</p>`}
+  </div>
+
+  <h3 style="font-family:'Baloo 2',sans-serif; font-size:19px; margin:18px 0 8px;">${T("My tasks","Mes tâches")}</h3>
+  ${todo.length ? todo.map(t=>`<div class="task">
+      <span class="ti">${t.title}${t.note?`<br><small style="font-weight:400; color:var(--ink-soft)">${t.note}</small>`:''}</span>
+      <span class="pay">+${money(t.amount)}</span>
+      <button class="go" data-done="${t.id}" style="background:${v.hex}">${T("Done!","C'est fait !")}</button>
+    </div>`).join('') : `<p style="font-size:13.5px; color:var(--ink-soft);">${T("No task for now.","Aucune tâche pour le moment.")}</p>`}
+  ${wait.length ? `<h4 style="font-size:14px; margin:14px 0 6px; color:var(--ink-soft);">${T("Waiting for a parent to check","En attente de validation")}</h4>
+    ${wait.map(t=>`<div class="task" style="opacity:.75">
+      <span class="ti">${t.title}</span><span class="pay">+${money(t.amount)}</span>
+      <span class="badge-wait">${T("checking…","à valider")}</span></div>`).join('')}` : ''}
+
+  <h3 style="font-family:'Baloo 2',sans-serif; font-size:19px; margin:20px 0 6px;">${T("History","L'historique")}</h3>
+  <div class="card" style="padding:12px 14px;">
+    ${(w.tx||[]).slice(-15).reverse().map(t=>`<div style="display:flex; gap:8px; padding:7px 2px; border-bottom:1px dotted #DDD8C8; font-size:13.5px;">
+        <span style="color:var(--ink-soft); white-space:nowrap;">${frDate(t.d)}</span>
+        <b style="flex:1">${t.label}</b>
+        <b style="color:${t.amount>=0?'var(--green)':'var(--red)'}; white-space:nowrap;">${t.amount>=0?'+':''}${money(t.amount)}</b>
+      </div>`).join('') || `<p style="font-size:13.5px; color:var(--ink-soft); margin:0;">${T("Nothing yet — earn your first reward today!","Rien pour l'instant — gagne ta première récompense aujourd'hui !")}</p>`}
+  </div>`;
+  document.getElementById('bk').onclick = ()=>menu(kid);
+  document.getElementById('refresh').onclick = ()=>walletView(kid, true);
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async ()=>{
+    const t = (TASKS[kid]||[]).find(x=>x.id===b.dataset.done);
+    if(!t) return;
+    t.status = 'pending'; t.doneAt = Date.now();
+    await saveTasks(kid);
+    walletView(kid);
+  });
+}
+
+/* la liste des chapitres d'une matière */
+function subjectView(kid, i, subs){
+  const v = DATA[kid], su = subs[i];
+  app.innerHTML = `
+  <div class="bar">
+    <button class="back" id="bk">← ${T("Subjects","Matières")}</button>
+    <span class="who" style="background:${v.hex}">${su.name}</span>
+  </div>
+  <div class="subject"><h2>${su.name}</h2><span>${T(su.note||'', su.noteFr||'')}</span></div>
+  ${su.sets.map((st,n)=>{
+      const p = progress[st.id];
+      const pct = p ? Math.round(100*p.best/p.total) : 0;
+      const stars = p ? (pct>=90?3:pct>=70?2:pct>=50?1:0) : 0;
+      if(st.daily){
+        const d = dailyStats(st);
+        return `<button class="card chap" data-set="${st.id}" style="border-color:${v.hex}">
+          <span class="n" style="background:${v.hex}">🔁</span>
+          <span class="t"><b>${T(st.title, st.titleFr)}</b>
+            <small>${T(st.sub, st.subFr)}</small>
+            <small style="color:${v.hex}; font-weight:700;">Aujourd'hui : ${Math.min(st.perDay||12, d.revoir + d.neufs + d.vus)} questions
+              ${d.revoir?` · ${d.revoir} à revoir`:''}${d.neufs?` · ${d.neufs} nouveaux mots`:''}</small>
+            <span class="barw" style="display:block; height:8px; border-radius:99px; background:#E7E3D6; margin-top:6px; overflow:hidden;">
+              <i style="display:block; height:100%; width:${Math.max(3, Math.round(100*d.appris/d.total))}%; background:${v.hex}"></i></span>
+            <small>${d.appris} mot(s) appris sur ${d.total}</small>
+          </span>
+        </button>`;
+      }
+      return `<button class="card chap" data-set="${st.id}">
+        <span class="n" style="background:${v.hex}">${n+1}</span>
+        <span class="t"><b>${T(st.title, st.titleFr)}${st.custom && !p ? '<span class="newbadge">✨ à faire</span>' : ''}</b>
+          <small>${T(st.sub, st.subFr)}${st.learn ? '' : ' · '+st.qs.length+' questions'}</small></span>
+        <span class="stars">${[0,1,2].map(x=>`<span class="${x<stars?'on':''}">★</span>`).join('')}</span>
+        ${p?`<span class="score">${p.best}/${p.total}</span>`:''}
+      </button>`;}).join('')}
+  <p class="foot">${T("Three stars means the chapter is mastered.","Trois étoiles : le chapitre est maîtrisé.")}</p>`;
+  document.getElementById('bk').onclick = ()=>menu(kid);
+  document.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{
+    const st = findSet(b.dataset.set);
+    if(st && st.learn) alphabet(); else startSet(b.dataset.set);
+  });
+}
+
+function findSet(id){
+  for(const su of DATA[S.kid].subjects) for(const st of su.sets) if(st.id===id) return st;
+  return (CUSTOM[S.kid]||[]).find(st => st.id===id);
+}
+
+function startSet(id){
+  const st = findSet(id);
+  S.set = st.daily ? Object.assign({}, st, { qs: chooseDaily(st, st.perDay || 12) }) : st;
+  S.i=0; S.score=0; S.tries=0; S.picked=null; S.log=[];
+  question();
+}
+
+/* ---------------- une question ---------------- */
+function question(){
+  const v = DATA[S.kid], st = S.set, q = st.qs[S.i];
+  S.tries = 0; S.picked = null; S.skipStep = false;
+  const pct = Math.round(100*S.i/st.qs.length);
+  app.innerHTML = `
+  <div class="bar">
+    <button class="back" id="bk">← Chapters</button>
+    <span class="who" style="background:${v.hex}">${st.title}</span>
+  </div>
+  <div class="prog"><i style="width:${pct}%; background:${v.hex}"></i></div>
+  <div class="card qcard">
+    <div class="qmeta">Question ${S.i+1} of ${st.qs.length}</div>
+    <div class="q">${T(q.q, q.fr)}</div>
+    ${q.say && canSpeak ? `<button class="speak" id="qsay" style="margin-top:10px;">🔊 ${T("Listen","Écouter")}</button><div id="qwarn"></div>` : ''}
+    ${q.t==='sentence'?`<div class="qhelp">${T("Rewrite the whole sentence with the capital letters and the punctuation.","Réécris la phrase entière, avec les majuscules et la ponctuation.")}</div>`:''}
+    <div class="answer" id="ans"></div>
+    <div id="fb"></div>
+    <button class="cta" id="go" style="background:${v.hex}">Check</button>
+  </div>`;
+  document.getElementById('bk').onclick = ()=>menu(S.kid);
+  const qs = document.getElementById('qsay');
+  if(qs){ qs.onclick = ()=>say(q.say, q.lang || 'en-GB', m=>{
+    const w = document.getElementById('qwarn'); if(w) w.innerHTML = `<p style="font-size:12px; color:var(--red); margin:6px 0 0;">${m}</p>`; }); }
+  const ans = document.getElementById('ans');
+
+  if(q.t==='choice'){
+    ans.innerHTML = `<div class="choices">${q.c.map((c,i)=>`<button class="choice" data-i="${i}">${c}</button>`).join('')}</div>`;
+    ans.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{
+      ans.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel'); S.picked = +b.dataset.i;
+    });
+  } else {
+    const isNum = q.t==='num';
+    const stp = q.step;
+    const keys = ['7','8','9','4','5','6','1','2','3','−','0','.']
+      .concat(stp && stp.type==='expr' ? ['+','×','÷'] : []);
+    ans.innerHTML = `
+      ${stp?`<div id="stepbox">
+        <div class="steplab"><b>Step 1</b> — ${T(stp.ask, stp.askFr)}</div>
+        <input class="txt active" id="st1" autocomplete="off" spellcheck="false"
+               placeholder="${stp.ph||''}" readonly>
+      </div>
+      <div class="steplab" id="lab2"><b>Step 2</b> — ${T("the answer","le résultat")}</div>`:''}
+      <input class="txt ${stp?'':'active'}" id="inp" autocomplete="off"
+             autocapitalize="${q.t==='sentence'?'sentences':'off'}"
+             spellcheck="false" placeholder="Your answer…" ${isNum?'readonly':''}>
+      <div class="tools">
+        ${isNum?`<button class="tool on" data-mode="pad">123 Digits</button>`:''}
+        <button class="tool ${isNum?'':'on'}" data-mode="key">⌨️ Keyboard</button>
+        <button class="tool" data-mode="pen">✍️ ${T("Write with your finger","Écrire au doigt")}</button>
+        ${stp?`<button class="tool" id="skip">${T("I can do it in my head","Je calcule de tête")}</button>`:''}
+      </div>
+      ${isNum?`<div class="keypad" id="keypad">
+        ${keys.map(k=>`<button data-k="${k}" class="${k==='−'?'alt':''}">${k}</button>`).join('')}
+        <button data-k="del" class="alt" style="grid-column:span 3">⌫ Delete</button>
+      </div>`:''}
+      <div class="padwrap hide" id="padwrap">
+        <canvas id="pad"></canvas>
+        <div class="padbar">
+          <button class="tool" id="clr">Clear</button>
+          <span class="padhint" id="padhint">${T("Write big, then tap <b>Check</b>.","Écris en gros, puis appuie sur Check.")}</span>
+        </div>
+      </div>`;
+    const inp = document.getElementById('inp');
+    const s1  = document.getElementById('st1');
+    setActive(s1 || inp);
+    [s1, inp].forEach(f=>{ if(!f) return;
+      f.addEventListener('pointerdown', ()=>setActive(f));
+      f.addEventListener('focus', ()=>setActive(f));
+      f.addEventListener('keydown', e=>{ if(e.key!=='Enter') return;
+        if(f===s1 && inp){ setActive(inp); inp.focus(); } else check(); });
+    });
+    if(!isNum) setTimeout(()=>{ if(AF) AF.focus(); },150);
+
+    const sk = document.getElementById('skip');
+    if(sk) sk.onclick = ()=>{
+      document.getElementById('stepbox').classList.add('hide');
+      document.getElementById('lab2').classList.add('hide');
+      sk.classList.add('hide'); S.skipStep = true; setActive(inp);
+      if(!isNum) inp.focus();
+    };
+
+    const kp = document.getElementById('keypad');
+    if(kp) kp.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{
+      const k = b.dataset.k, f = AF || inp;
+      if(k==='del'){ f.value = f.value.slice(0,-1); return; }
+      if(k==='−'){
+        const isCalc = (f.id === 'st1' && stp && stp.type === 'expr');
+        const last = f.value.trim().slice(-1);
+        if(isCalc || f.value.trim()==='' || '+-*/×÷('.indexOf(last)>=0) f.value += '-';
+        else f.value = f.value.startsWith('-') ? f.value.slice(1) : '-'+f.value;
+        return;
+      }
+      f.value += k;
+    });
+
+    ans.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{
+      ans.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('on', x===b));
+      const m = b.dataset.mode;
+      document.getElementById('padwrap').classList.toggle('hide', m!=='pen');
+      if(kp) kp.classList.toggle('hide', m!=='pad');
+      [s1, inp].forEach(f=>{ if(f) f.readOnly = (m!=='key'); });
+      if(m==='pen') initPad();
+      if(m==='key' && AF) AF.focus();
+    });
+  }
+  document.getElementById('go').onclick = check;
+}
+
+/* ---------------- ardoise ---------------- */
+let padCtx=null, drawing=false, hasInk=false, ink=null;
+function resetInk(){ ink = {x0:1e9,y0:1e9,x1:-1e9,y1:-1e9}; hasInk=false; }
+function grow(x,y){ ink.x0=Math.min(ink.x0,x); ink.y0=Math.min(ink.y0,y); ink.x1=Math.max(ink.x1,x); ink.y1=Math.max(ink.y1,y); }
+function padHint(html){ const h=document.getElementById('padhint'); if(h) h.innerHTML=html; }
+
+function initPad(){
+  const c = document.getElementById('pad');
+  if(!c || c.dataset.ready) return;
+  const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio||1;
+  c.width = Math.round(r.width*dpr); c.height = Math.round(r.height*dpr);
+  padCtx = c.getContext('2d'); padCtx.scale(dpr,dpr);
+  padCtx.lineWidth=7; padCtx.lineCap='round'; padCtx.lineJoin='round'; padCtx.strokeStyle='#1B2A5B';
+  resetInk();
+  const pos = e => { const b=c.getBoundingClientRect(); return [e.clientX-b.left, e.clientY-b.top]; };
+  c.addEventListener('pointerdown', e=>{ e.preventDefault(); drawing=true; hasInk=true; c.setPointerCapture(e.pointerId);
+    const [x,y]=pos(e); grow(x,y); padCtx.beginPath(); padCtx.moveTo(x,y); padCtx.lineTo(x+.1,y); padCtx.stroke(); });
+  c.addEventListener('pointermove', e=>{ if(!drawing) return; const [x,y]=pos(e); grow(x,y); padCtx.lineTo(x,y); padCtx.stroke(); });
+  c.addEventListener('pointerup', ()=>drawing=false);
+  c.addEventListener('pointercancel', ()=>drawing=false);
+  c.dataset.ready = 1;
+  document.getElementById('clr').onclick = ()=>{
+    padCtx.clearRect(0,0,c.width,c.height); resetInk();
+    padHint(T("Write big, then tap <b>Check</b>.","Écris en gros, puis appuie sur Check."));
+    const i=document.getElementById('inp'); if(i) i.value='';
+  };
+}
+
+/* exporte l'écriture : fond blanc, recadré sur le tracé, agrandi */
+function exportInk(){
+  const c = document.getElementById('pad');
+  const dpr = window.devicePixelRatio||1, m = 26;
+  const W = c.width/dpr, H = c.height/dpr;
+  let x0 = Math.max(0, ink.x0-m), y0 = Math.max(0, ink.y0-m);
+  let x1 = Math.min(W, ink.x1+m), y1 = Math.min(H, ink.y1+m);
+  let w = Math.max(40, x1-x0), h = Math.max(40, y1-y0);
+  const scale = Math.min(5, Math.max(1.5, 300/h));
+  const o = document.createElement('canvas');
+  o.width = Math.round(w*scale); o.height = Math.round(h*scale);
+  const oc = o.getContext('2d');
+  oc.fillStyle = '#FFFFFF'; oc.fillRect(0,0,o.width,o.height);
+  oc.drawImage(c, x0*dpr, y0*dpr, w*dpr, h*dpr, 0, 0, o.width, o.height);
+  return o.toDataURL('image/png').split(',')[1];
+}
+
+/* renvoie le texte lu, ou null */
+async function readPad(kind){
+  if(!hasInk) return null;
+  padHint("Reading your handwriting…");
+  const what = kind==='num'
+    ? "The child wrote a NUMBER. It can be negative: a dash on the left means a minus sign. It can have a decimal point. Answer with the number only, for example: -5 or 0.45 or 12."
+    : "The child wrote a short answer in English (a word or a short sentence). Answer with that text only, keeping the capital letters, apostrophes and punctuation exactly as written.";
+  try{
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), 25000);
+    const r = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST", headers:{"Content-Type":"application/json"}, signal: ctrl.signal,
+      body: JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000, messages:[{role:"user", content:[
+        {type:"image", source:{type:"base64", media_type:"image/png", data: exportInk()}},
+        {type:"text", text:"This image shows a child's handwriting on a white background. "+what+
+         " Reply with the transcription and NOTHING else: no quotes, no explanation, no full stop of your own. If the image is empty or unreadable, reply exactly: ???"}]}]})
+    });
+    clearTimeout(timer);
+    const j = await r.json();
+    const txt = (j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+    if(!txt || txt.indexOf('?？')===0 || txt==='???'){ padHint(T("I cannot read this. Write bigger, or use the keyboard.","Je n'arrive pas à lire. Réécris plus gros, ou passe au clavier.")); return null; }
+    padHint(T("I read: <b>"+txt.replace(/</g,'&lt;')+"</b> — fix it with the keyboard if that is wrong.","J'ai lu : "+txt.replace(/</g,'&lt;')+" — corrige au clavier si ce n'est pas ça."));
+    return txt;
+  }catch(e){
+    padHint(T("Handwriting reading is not working here. Use the <b>digits</b> or the <b>keyboard</b>.","La lecture de l'écriture ne marche pas ici. Utilise le pavé de chiffres ou le clavier."));
+    return null;
+  }
+}
+
+/* ---------------- champ actif & étape 1 ---------------- */
+let AF = null;
+function setActive(f){
+  if(!f) return;
+  AF = f;
+  [document.getElementById('st1'), document.getElementById('inp')].forEach(x=>{
+    if(x) x.classList.toggle('active', x===f && !x.classList.contains('done'));
+  });
+}
+function evalExpr(str){
+  let t = norm(str).replace(/×/g,'*').replace(/÷/g,'/').replace(/,/g,'.').replace(/\s+/g,'');
+  if(!t) return {err:"vide"};
+  if(!/^[-+*/().0-9]+$/.test(t)) return {err:T("Use only numbers and signs (+ − × ÷).","Écris seulement des nombres et des signes (+ − × ÷).")};
+  try{
+    const v = Function('"use strict";return ('+t+')')();
+    if(typeof v!=='number' || !isFinite(v)) return {err:T("This calculation does not work. Check the signs.","Ce calcul ne se termine pas. Vérifie les signes.")};
+    return {v, raw:t};
+  }catch(e){ return {err:T("This calculation is not written correctly. Check the signs and the brackets.","Ce calcul n'est pas écrit correctement. Vérifie les signes et les parenthèses.")}; }
+}
+function judgeStep(stp, val){
+  if(!val.trim()) return {ok:false, why:T("Write step 1 first — or tap « I can do it in my head ».","Écris d'abord l'étape 1 — ou appuie sur « Je calcule de tête ».")};
+  if(stp.type==='num'){
+    const v = numVal(val);
+    if(isNaN(v)) return {ok:false, why:T("Write a number.","Écris un nombre.")};
+    if(Math.abs(v-stp.a)<1e-9) return {ok:true};
+    if(Math.abs(v+stp.a)<1e-9) return {ok:false, why:T("The number is right, but <b>the sign is wrong</b>.","Le nombre est bon, mais le signe est faux.")};
+    return {ok:false, why:stp.e};
+  }
+  const flat = norm(val).replace(/×/g,'*').replace(/÷/g,'/').replace(/\s+/g,'');
+  if(flat.indexOf('--')>=0)
+    return {ok:false, why:T("There is still a <b>« − − »</b> in your calculation. That is exactly what becomes a <b>+</b>.","Il reste un « − − » dans ton calcul. C'est justement lui qu'il faut remplacer par un +.")};
+  const r = evalExpr(val);
+  if(r.err) return {ok:false, why:r.err};
+  if(!/[+\-*/]/.test(r.raw.slice(1)))
+    return {ok:false, why:T("Write the <b>calculation</b>, not just the answer.","Écris le calcul, pas seulement le résultat.") + (stp.ph?" ("+stp.ph+")":"")};
+  if(Math.abs(r.v-stp.want)>1e-9) return {ok:false, why:stp.e};
+  return {ok:true};
+}
+function tip(txt){
+  document.getElementById('fb').innerHTML =
+    `<div class="fb tip"><span class="mark">${pencil()}</span><span><h3>${T("Look at step 1 again","Étape 1 à revoir")}</h3><p>${txt}</p></span></div>`;
+}
+function pencil(){ return `<svg viewBox="0 0 40 40" width="40"><path d="M8 32 L12 22 L28 6 L34 12 L18 28 Z" fill="none" stroke="#E08A00" stroke-width="4" stroke-linejoin="round"/></svg>`; }
+
+/* ---------------- correction ---------------- */
+const norm = s => (s||'').toString().trim().replace(/[’‘`]/g,"'").replace(/[−–—]/g,'-').replace(/\s+/g,' ');
+const bare = s => norm(s).toLowerCase().replace(/[.,!?;:"']/g,'').replace(/\s+/g,' ').trim();
+function numVal(s){ return parseFloat(norm(s).replace(/\s/g,'').replace(',','.')); }
+
+function judge(q, given){
+  if(q.t==='choice') return { ok: S.picked===q.a };
+  if(given===''||given==null) return { ok:false, why:"Écris une réponse avant de vérifier." };
+  if(q.t==='num'){
+    const v = numVal(given);
+    if(isNaN(v)) return { ok:false, why:T("I did not understand that number. Write for example −5 or 0.45.","Je n'ai pas compris ce nombre. Écris par exemple −5 ou 0.45.") };
+    if(Math.abs(v-q.a) < 1e-9) return { ok:true };
+    if(Math.abs(v+q.a) < 1e-9) return { ok:false, why:T("The number is right, but <b>the sign is wrong</b>.","Le nombre est bon, mais le signe est faux. Relis la règle des signes.") };
+    return { ok:false };
+  }
+  const accepted = q.a.map(x=>x);
+  if(q.t==='text'){
+    const g = bare(given);
+    if(accepted.some(a=>bare(a)===g)){
+      if(q.strict && !q.strict.some(a=>norm(a).toLowerCase()===norm(given).toLowerCase()))
+        return { ok:false, why:T("The <b>apostrophe</b> is missing: " + q.strict[0] + ".","Il manque l'apostrophe : " + q.strict[0] + ".") };
+      return { ok:true };
+    }
+    return { ok:false };
+  }
+  // sentence
+  if(accepted.some(a=>norm(a)===norm(given))) return { ok:true };
+  if(accepted.some(a=>norm(a).toLowerCase()===norm(given).toLowerCase()))
+    return { ok:false, why:T("Everything is right except <b>the capital letters</b>.","Tout est bon sauf les majuscules. Regarde chaque nom propre et le début de la phrase.") };
+  if(accepted.some(a=>bare(a)===bare(given)))
+    return { ok:false, why:T("The words are right: <b>a capital letter or the punctuation</b> is missing.","Les mots sont bons : il manque la ponctuation ou une majuscule. Une phrase finit par un point.") };
+  return { ok:false };
+}
+
+let busy = false;
+
+/* une seule chance : on corrige, on explique, on passe à la suite */
+function lockAndShow(q, cardHTML){
+  const go = document.getElementById('go');
+  const inp = document.getElementById('inp');
+  const s1 = document.getElementById('st1');
+  document.getElementById('fb').innerHTML = cardHTML;
+  if(inp) inp.disabled = true;
+  if(s1) s1.disabled = true;
+  document.querySelectorAll('.keypad button, .tool, #clr').forEach(b=>b.disabled = true);
+  go.textContent = (S.i+1 < S.set.qs.length) ? "Next question" : "See my score";
+  go.onclick = next;
+}
+function solutionOf(q){
+  return q.t==='choice' ? q.c[q.a]
+       : q.t==='num'    ? String(q.a).replace('-','−')
+       : q.a[0];
+}
+function wrongCard(q, lead, extra){
+  return `<div class="fb no">
+    <span class="mark">${cross()}</span>
+    <span><h3>${lead}</h3>
+    ${extra||''}
+    <p>${T("The correct answer is:","La bonne réponse :")}</p>
+    <p class="sol">${solutionOf(q)}</p>
+    <p>${q.e||''}</p>
+    <p><i>${T("Copy it once in your exercise book — it helps you remember it.","Recopie-la une fois dans ton cahier, ça aide à la retenir.")}</i></p></span></div>`;
+}
+
+async function check(){
+  if(busy) return;
+  const q = S.set.qs[S.i];
+  const inp = document.getElementById('inp');
+  const go = document.getElementById('go');
+  if(q.t==='choice' && S.picked===null){ flash(T("Choose an answer.","Choisis une réponse.")); return; }
+
+  const s1 = document.getElementById('st1');
+  const stepOn = !!(q.step && s1 && !S.skipStep && !document.getElementById('stepbox').classList.contains('hide'));
+
+  // mode écriture : on lit le tracé dans le champ actif
+  const penOn = !!document.querySelector('[data-mode="pen"].on');
+  const field = (AF && AF.offsetParent!==null) ? AF : inp;
+  if(field && penOn && !field.value.trim()){
+    if(!hasInk){ flash(T("Write your answer on the board, then tap Check.","Écris ta réponse sur l'ardoise, puis appuie sur Check.")); return; }
+    busy = true; const lbl = go.textContent; go.textContent = "Reading your handwriting…";
+    const txt = await readPad(stepOn && field===s1 && q.step.type==='expr' ? 'expr' : q.t);
+    go.textContent = lbl; busy = false;
+    if(txt===null) return;          // lecture ratée : rien n'est décompté
+    field.value = txt;
+  }
+
+  // étape 1 : elle fait partie de l'exercice, une seule chance aussi
+  if(stepOn){
+    if(!s1.value.trim()){ tip(T("Write step 1 first — or tap « I can do it in my head ».","Écris d'abord l'étape 1 — ou appuie sur « Je calcule de tête ».")); setActive(s1); return; }
+    const rs = judgeStep(q.step, s1.value);
+    if(!rs.ok){
+      if(q._k) srsUpdate(q._k, false);
+      S.log.push({q:q.q, ok:false, a:'étape 1 : '+s1.value, c:solutionOf(q)});
+      if(q.t==='choice') markChoices(q);
+      lockAndShow(q, wrongCard(q, T("Step 1 is wrong.","L'étape 1 est fausse."),
+        `<p>${rs.why||''}</p>`));
+      return;
+    }
+    s1.classList.add('done'); s1.classList.remove('active');
+    if(!inp.value.trim()){
+      setActive(inp);
+      if(penOn && padCtx){ const c=document.getElementById('pad'); padCtx.clearRect(0,0,c.width,c.height); resetInk();
+        padHint(T("Step 1 is right! Now write the <b>answer</b>.","Étape 1 juste ! Écris maintenant le résultat.")); }
+      document.getElementById('fb').innerHTML =
+        `<div class="fb ok"><span class="mark">${tick()}</span><span><h3>${T("Step 1 is right!","Étape 1 juste !")}</h3><p>${T("Now write the answer.","Écris maintenant le résultat.")}</p></span></div>`;
+      if(!inp.readOnly) inp.focus();
+      return;
+    }
+  }
+
+  const given = inp ? inp.value : '';
+  if(inp && !given.trim()){ flash(T("Write an answer before you check.","Écris une réponse avant de vérifier.")); return; }
+  const res = judge(q, given);
+  if(q.t==='choice') markChoices(q);
+
+  const typed = (q.t==='choice') ? (S.picked!=null ? q.c[S.picked] : '') : given;
+  if(q._k) srsUpdate(q._k, res.ok);
+  if(res.ok){
+    S.score += 1;
+    S.log.push({q:q.q, ok:true, a:typed, c:solutionOf(q)});
+    lockAndShow(q, `<div class="fb ok">
+      <span class="mark">${tick()}</span>
+      <span><h3>${(b=>T(b[0],b[1]))(pick(BRAVO))}</h3>
+      <p>${q.e||''}</p></span></div>`);
+    return;
+  }
+
+  S.log.push({q:q.q, ok:false, a:typed, c:solutionOf(q)});
+  lockAndShow(q, wrongCard(q, T("That's wrong.","C'est faux."), res.why?`<p>${res.why}</p>`:''));
+}
+function markChoices(q){
+  document.querySelectorAll('.choice').forEach(b=>{
+    b.disabled = true; b.classList.remove('sel');
+    if(+b.dataset.i===q.a) b.classList.add('good');
+    else if(+b.dataset.i===S.picked) b.classList.add('bad');
+  });
+}
+function flash(msg){
+  const fb = document.getElementById('fb');
+  fb.innerHTML = `<div class="fb no"><span class="mark">${cross()}</span><span><h3>${T("Wait…","Attends…")}</h3><p>${msg}</p></span></div>`;
+}
+function tick(){ return `<svg viewBox="0 0 40 40" width="40"><path d="M6 21 L16 31 L34 8" fill="none" stroke="#17864F" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`; }
+function cross(){ return `<svg viewBox="0 0 40 40" width="40"><path d="M9 9 L31 31 M31 9 L9 31" fill="none" stroke="#D4342A" stroke-width="5" stroke-linecap="round"/></svg>`; }
+
+function next(){
+  if(S.i+1 < S.set.qs.length){ S.i++; question(); }
+  else results();
+}
+
+/* ---------------- résultats ---------------- */
+async function results(){
+  const v = DATA[S.kid], st = S.set, total = st.qs.length;
+  const score = S.score;
+  const pct = score/total;
+  const strip = t => (t||'').toString().replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+  if(st.daily) await store.set(K.srs(S.kid), SRS);
+  const gagne = await checkDailyReward(S.kid);
+  await saveResult(S.kid, st.id, st.title, score, total,
+    S.log.filter(l=>!l.ok).map(l=>strip(l.q)),
+    S.log.map(l=>({ q:strip(l.q).slice(0,70), a:strip(l.a).slice(0,30), c:strip(l.c).slice(0,30), ok:l.ok })));
+  let title, msg;
+  if(pct>=0.9){ title=T("Excellent, "+v.name+"!","Excellent, "+v.name+" !");
+    msg=T("You have got this chapter. You can move on to the next one.","Ce chapitre est acquis. Tu peux passer au suivant."); }
+  else if(pct>=0.7){ title=T("Well done!","Bien joué !");
+    msg=T("Almost perfect. Do the chapter once more to get the three stars.","C'est presque parfait. Refais le chapitre une fois pour viser les trois étoiles."); }
+  else if(pct>=0.5){ title=T("Good start.","Bon début.");
+    msg=T("Read the explanation of the questions you missed, then start the chapter again.","Relis l'explication des questions ratées, puis recommence le chapitre : tu vas beaucoup progresser."); }
+  else if(st.daily && pct>=0.5){ title=T("Good session!","Bonne séance !");
+    msg=T("The words you missed will come back in a few days.","Les mots ratés reviendront dans quelques jours, c'est comme ça qu'on les retient."); }
+  else { title=T("Let's do this one together.","On recommence ensemble.");
+    msg=T("This chapter is still hard. Go over the lesson with an adult, then try again — nobody gets it first time.","Ce chapitre est encore difficile. Reprends la leçon avec un adulte, puis refais l'exercice — personne ne réussit du premier coup."); }
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Chapters</button>
+  <span class="who" style="background:${v.hex}">${st.title}</span></div>
+  ${gagne?`<div class="card" style="padding:16px; text-align:center; border-color:#E08A00; background:#FFFBEB; margin-bottom:14px;">
+      <div style="font-size:34px;">🎉💰</div>
+      <div style="font-family:'Baloo 2',sans-serif; font-size:21px; color:#B45309;">${T("Reward earned!","Récompense gagnée !")} +${money(REWARD.amount)}</div>
+      <div style="font-size:13px; color:var(--ink-soft);">${T("It is in your piggy bank.","C'est dans ta cagnotte.")}</div></div>`:''}
+  <div class="card result">
+    <div class="circle"><span class="big">${score}/${total}</span></div>
+    <h2>${title}</h2><p>${msg}</p>
+    <div class="recap">
+      ${S.log.map((l,i)=>`<div><b style="color:${l.ok?'var(--green)':'var(--red)'}">${l.ok?'✓':'✗'}</b>
+        <span>${l.q.replace(/<[^>]+>/g,' ')}</span></div>`).join('')}
+    </div>
+    <button class="cta" id="again" style="background:${v.hex}">${T("Do this chapter again","Refaire ce chapitre")}</button>
+    <button class="cta ghost" id="home2">${T("Choose another chapter","Choisir un autre chapitre")}</button>
+  </div>`;
+  document.getElementById('bk').onclick = ()=>menu(S.kid);
+  document.getElementById('home2').onclick = ()=>menu(S.kid);
+  document.getElementById('again').onclick = ()=>startSet(st.id);
+}
+
+/* ============================================================ ESPACE PARENT */
+const VERSION = 'v26 · envoi immédiat et journal';
+const KIDS = ['lina','ilyes'];
+const dayKey = d => { const z=new Date(d); return new Date(z.getTime()-z.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+const frDate = iso => new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+
+async function parents(){
+  const D = {};
+  await pullRemote(true); await loadCustom(); await loadMoney();
+  for(const kid of KIDS) await checkDailyReward(kid);
+  for(const kid of KIDS) D[kid] = {
+    prog: (await store.get(K.prog(kid), true)) || {},
+    hist: (await store.get(K.hist(kid), true)) || []
+  };
+
+  const block = kid => {
+    const v = DATA[kid], prog = D[kid].prog, hist = D[kid].hist;
+    const sets = allSets(kid);
+    const done = sets.filter(x => prog[x.st.id]);
+    const totQ = hist.reduce((a,h)=>a+h.total,0), totS = hist.reduce((a,h)=>a+h.score,0);
+    const avg = totQ ? Math.round(100*totS/totQ) : 0;
+    const last = hist.length ? frDate(hist[hist.length-1].d) : '—';
+
+    // 7 derniers jours
+    const days = [];
+    for(let i=6;i>=0;i--){ const d = new Date(); d.setDate(d.getDate()-i); days.push(dayKey(d)); }
+    const per = days.map(d => { const hs = hist.filter(h=>h.d===d);
+      return { d, q: hs.reduce((a,h)=>a+h.total,0), s: hs.reduce((a,h)=>a+h.score,0) }; });
+    const maxQ = Math.max(8, ...per.map(x=>x.q));
+
+    const rows = sets.map(({su,st}) => {
+      const p = prog[st.id];
+      const pct = p ? Math.round(100*p.best/p.total) : null;
+      const col = pct===null ? '#9CA3AF' : pct>=70 ? 'var(--green)' : pct>=50 ? 'var(--amber)' : 'var(--red)';
+      return `<tr>
+        <td><b>${st.title}</b><br><small style="color:var(--ink-soft)">${su}${st.custom?' · ajouté par toi':''}</small></td>
+        <td class="r" style="color:${col}">${p ? `<span class="pct" data-last="${kid}|${st.id}" style="cursor:pointer; text-decoration:underline dotted;">${p.best}/${p.total}</span>` : '<span class="pct">—</span>'}</td>
+        <td class="r">${p ? p.tries+'×' : ''}</td>
+        <td class="r" style="color:var(--ink-soft)">${p&&p.lastAt ? frDate(p.lastAt) : ''}</td>
+        ${st.custom?`<td class="r"><button class="del" data-del="${st.id}" data-kid="${kid}">✕</button></td>`:'<td></td>'}
+      </tr>`; }).join('');
+
+    const weak = sets.filter(x => prog[x.st.id] && prog[x.st.id].best/prog[x.st.id].total < 0.5)
+                     .map(x => x.st.title);
+    const never = sets.filter(x => !prog[x.st.id]).length;
+
+    return `<div class="card" style="padding:18px 16px; margin-bottom:16px; border-color:${v.hex}">
+      <div style="display:flex; align-items:center; gap:12px;">
+        ${PHOTOS[kid] ? `<img class="ava" src="${PHOTOS[kid]}" style="width:52px; height:52px; border-color:${v.hex}">` : ''}
+        <h2 style="font-size:23px; color:${v.hex}">${v.name}</h2>
+        ${PHOTOS[kid] ? `<span style="font-size:11px; color:var(--ink-soft)">photo ${Math.round(PHOTOS[kid].length/1024)} Ko</span>` : ''}
+        <span style="font-size:12.5px; color:var(--ink-soft)">dernière activité : ${last}</span>
+      </div>
+      <p style="margin:6px 0 0; font-size:14px;">
+        <b>${totQ}</b> questions répondues · moyenne <b style="color:${avg>=70?'var(--green)':avg>=50?'var(--amber)':'var(--red)'}">${avg}%</b>
+        · <b>${done.length}</b> chapitre(s) sur ${sets.length} commencés</p>
+      ${weak.length?`<p style="margin:4px 0 0; font-size:13.5px; color:var(--red)"><b>À retravailler :</b> ${weak.join(' · ')}</p>`:''}
+      ${never?`<p style="margin:2px 0 0; font-size:13px; color:var(--ink-soft)">${never} chapitre(s) jamais ouverts.</p>`:''}
+
+      <div class="bars">
+        ${per.map(x=>`<div>
+          <small>${x.q?Math.round(100*x.s/x.q)+'%':''}</small>
+          <div class="bar" style="height:${Math.round(100*x.q/maxQ)}%; background:${x.q?v.hex:'#E7E3D6'}"></div>
+          <small>${new Date(x.d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short'})}<br>${x.q||''}</small>
+        </div>`).join('')}
+      </div>
+      <p style="font-size:11.5px; color:var(--ink-soft); margin:4px 0 0;">Questions répondues par jour, et % de réussite au-dessus.</p>
+
+      <table class="ptab">
+        <tr><th>Chapitre</th><th class="r">Meilleur</th><th class="r">Essais</th><th class="r">Le</th><th></th></tr>
+        ${rows}
+      </table>
+
+      <details style="margin-top:10px;" open><summary style="font-size:13.5px; font-weight:700; cursor:pointer;">Historique des séances (${hist.length})</summary>
+        ${hist.length ? hist.slice(-25).reverse().map(h=>{
+          const pc = Math.round(100*h.score/h.total);
+          const col = pc>=70?'var(--green)':pc>=50?'var(--amber)':'var(--red)';
+          return `<div style="padding:8px 4px; border-bottom:1px dotted #DDD8C8;">
+            <div style="display:flex; gap:8px; align-items:baseline; font-size:13.5px;">
+              <span style="color:var(--ink-soft); white-space:nowrap;">${frDate(h.d)}</span>
+              <b style="flex:1">${h.title||h.set}</b>
+              ${h.qs ? `<button class="tool" data-sess="${kid}|${h.ts}" style="padding:4px 10px; font-size:13px; color:${col}; border-color:${col}"><b>${h.score}/${h.total}</b> ›</button>`
+                     : `<b style="color:${col}; white-space:nowrap;">${h.score}/${h.total}</b>`}
+            </div>
+            ${(h.w&&h.w.length)?`<div style="font-size:12px; color:var(--red); margin-top:3px;">
+               ✗ raté : ${h.w.map(x=>x.replace(/&nbsp;/g,' ')).join(' &nbsp;·&nbsp; ')}</div>`:
+               `<div style="font-size:12px; color:var(--green); margin-top:3px;">✓ tout juste</div>`}
+          </div>`;}).join('')
+        : '<p style="font-size:13px; color:var(--ink-soft)">Aucune séance pour le moment.</p>'}
+      </details>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+        <button class="tool" data-money="${kid}" style="border-color:#E08A00; color:#B45309">💰 Cagnotte et tâches${(TASKS[kid]||[]).filter(t=>t.status==='pending').length?' · '+(TASKS[kid]||[]).filter(t=>t.status==='pending').length+' à valider':''}</button>
+        <button class="tool" data-add="${kid}" style="border-color:${v.hex}; color:${v.hex}">➕ Écrire un chapitre</button>
+        <button class="tool" data-imp="${kid}" style="border-color:${v.hex}; color:${v.hex}">📥 Importer un chapitre</button>
+        <button class="tool" data-photo="${kid}">📷 ${PHOTOS[kid]?'Changer la photo de '+v.name:'Ajouter la photo de '+v.name}</button>
+        ${PHOTOS[kid]?`<button class="tool" data-nophoto="${kid}">Retirer</button>`:''}
+        <button class="tool" data-reset="${kid}">Effacer la progression</button>
+      </div>
+    </div>`;
+  };
+
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Retour</button>
+    <span class="who" style="background:var(--ink)">Espace parent</span></div>
+  ${KIDS.map(block).join('')}
+  <div class="card" style="padding:16px; margin-bottom:14px; border-color:${SYNC.url?(syncState==='ok'?'var(--green)':'var(--red)'):'var(--ink)'}">
+    <h3 style="font-size:16px; margin-bottom:4px;">Synchronisation entre appareils</h3>
+    <p style="font-size:13px; margin:0 0 8px;">État : <b style="color:${SYNC.url?(syncState==='ok'?'var(--green)':'var(--red)'):'var(--ink-soft)'}">${
+      !SYNC.url ? 'non configurée — chaque appareil garde ses propres données'
+      : (syncState==='ok' ? 'active, les appareils partagent les mêmes données' : 'problème : '+syncState)}</b>${syncError?` <span style="font-size:11.5px; color:var(--red)">(${syncError})</span>`:''}</p>
+    <div class="field"><label>Adresse (URL)</label><input id="sy-url" value="${SYNC.url||''}" placeholder="https://api.jsonbin.io/v3/b/TON_ID"></div>
+    <div class="field"><label>Clé d'accès</label><input id="sy-key" value="${SYNC.key||''}" placeholder="$2b$10$..."></div>
+    <div class="field"><label>Type de service</label>
+      <select id="sy-mode"><option value="jsonbin">JSONBin</option><option value="raw">API GET / PUT classique</option></select></div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+      <button class="tool on" id="sy-save">Tester et enregistrer</button>
+      ${SYNC.url?`<button class="tool" id="sy-now">↻ Récupérer du serveur</button>`:''}
+      ${SYNC.url?`<button class="tool" id="sy-push">⬆ Forcer l'envoi au serveur</button>`:''}
+    </div>
+    <p style="font-size:12px; color:var(--ink-soft); margin:8px 0 0;">
+      Données : <b>${Math.round(JSON.stringify(DB).length/1024)} Ko</b> au total
+      ${SYNC.url?` · envoyées au serveur : <b>${lastSize.envoye||'?'} Ko</b> ${canZip?'(compressées)':'(sans compression)'}`:''}.
+      Les photos ne sont jamais envoyées au serveur.</p>
+    <p style="font-size:12px; color:var(--ink-soft); margin:4px 0 0;">
+      Code famille de cet appareil : <b>${CODE}</b> ·
+      dernière lecture : <b>${lastPullAt?new Date(lastPullAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'jamais'}</b> ·
+      dernier envoi : <b>${lastPushAt?new Date(lastPushAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'jamais'}</b></p>
+    ${SYNCLOG.length?`<details style="margin-top:8px;"><summary style="font-size:12.5px; font-weight:700; cursor:pointer;">Journal des échanges (${SYNCLOG.length})</summary>
+      ${SYNCLOG.slice().reverse().map(l=>`<div style="font-size:11.5px; padding:4px 0; border-bottom:1px dotted #DDD8C8;">
+        <span style="color:var(--ink-soft)">${new Date(l.t).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
+        <b style="color:${l.ok?'var(--green)':'var(--red)'}"> ${l.ok?'✓':'✗'} ${l.what}</b>
+        <span style="color:var(--ink-soft)"> — ${l.msg}</span></div>`).join('')}
+      </details>`:''}
+    <p style="font-size:11.5px; color:var(--ink-soft); margin:8px 0 0;">À saisir <b>sur chaque appareil</b> (la tablette et ton téléphone), une seule fois.
+    Crée un bin gratuit sur jsonbin.io avec le contenu <code>{}</code>, colle son adresse et ta clé X-Master-Key.</p>
+  </div>
+  <div class="card" style="padding:16px; margin-bottom:14px;">
+    <h3 style="font-size:16px; margin-bottom:4px;">Voix de l'appareil 🔊</h3>
+    <div id="voxinfo" style="font-size:13px;">Lecture en cours…</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+      <button class="tool" data-test="en-GB">Tester l'anglais</button>
+      <button class="tool" data-test="ar-SA">Tester l'arabe</button>
+      <button class="tool" data-test="fr-FR">Tester le français</button>
+    </div>
+    <div id="voxmsg"></div>
+  </div>
+  <div class="card" style="padding:16px; margin-bottom:14px;">
+    <h3 style="font-size:16px; margin-bottom:4px;">Sauvegarde des données</h3>
+    <p style="font-size:13px; margin:0 0 8px;">Où sont enregistrées les données en ce moment :
+      <b>${hasLS?'sur cet appareil':''}${hasLS&&hasArtifact?' + ':''}${hasArtifact?'dans l\'artefact Claude':''}${(!hasLS&&!hasArtifact)?'nulle part (mémoire seulement)':''}</b>${SYNC.url?` + <b>serveur (${syncState})</b>`:''}.</p>
+    ${!SYNC.url?`<p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 8px;">Aucun serveur configuré : chaque appareil garde ses propres données.
+      Pour les synchroniser, héberge le fichier et remplis le bloc <b>SYNC</b> en haut du code.</p>`:''}
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="tool on" id="exp">⬇ Exporter une sauvegarde</button>
+      <button class="tool" id="impb">⬆ Restaurer une sauvegarde</button>
+      <input type="file" id="imp" accept="application/json" style="display:none">
+    </div>
+    <p style="font-size:11.5px; color:var(--ink-soft); margin:8px 0 0;">Exporte de temps en temps : le fichier .json contient toute la progression et tes chapitres. Il se restaure sur n'importe quelle version du site.</p>
+  </div>
+  <div class="card" style="padding:16px;">
+    <h3 style="font-size:16px; margin-bottom:4px;">Code famille</h3>
+    <p style="font-size:13px; margin:0 0 6px;">Les résultats et les chapitres que tu ajoutes sont partagés entre les appareils qui utilisent <b>le même code</b>.
+    Mets le même code sur la tablette des enfants et sur ton téléphone, puis rafraîchis la page.</p>
+    <div style="display:flex; gap:8px;">
+      <input id="code" value="${CODE}" style="flex:1; font-family:'Nunito',sans-serif; font-size:16px; padding:9px 11px; border:2px solid var(--ink); border-radius:10px;">
+      <button class="tool on" id="savecode">Enregistrer</button>
+    </div>
+    <p style="font-size:11.5px; color:var(--ink-soft); margin:6px 0 0;">Choisis un code que personne ne devinera : toute personne qui a le lien <i>et</i> le code verrait les résultats.</p>
+  </div>
+  <input type="file" accept="image/*" id="ph-file" style="display:none">
+  <p class="foot">Sauvegarde régulièrement : c'est le seul moyen sûr de ne rien perdre. — <b>${VERSION}</b></p>`;
+
+  document.getElementById('bk').onclick = home;
+  (function voices(){
+    const show = () => {
+      refreshVoices();
+      const el = document.getElementById('voxinfo'); if(!el) return;
+      if(!canSpeak){ el.innerHTML = "<b style='color:var(--red)'>Ce navigateur ne sait pas lire à voix haute.</b>"; return; }
+      const langs = [...new Set(VOICES.map(v=>v.lang))].sort();
+      const has = p => langs.some(l=>l.toLowerCase().startsWith(p));
+      el.innerHTML = !langs.length
+        ? "Aucune voix détectée pour l'instant — touche l'écran puis rouvre cette page."
+        : `Anglais : <b style="color:${has('en')?'var(--green)':'var(--red)'}">${has('en')?'disponible':'absent'}</b> ·
+           Arabe : <b style="color:${has('ar')?'var(--green)':'var(--red)'}">${has('ar')?'disponible':'absent'}</b> ·
+           Français : <b style="color:${has('fr')?'var(--green)':'var(--red)'}">${has('fr')?'disponible':'absent'}</b>
+           <br><span style="font-size:11.5px; color:var(--ink-soft)">${langs.length} voix installées : ${langs.slice(0,12).join(', ')}</span>`;
+    };
+    show(); setTimeout(show, 800);
+    document.querySelectorAll('[data-test]').forEach(b=>b.onclick=()=>{
+      const lg = b.dataset.test;
+      const txt = lg==='ar-SA' ? 'مرحبا' : lg==='en-GB' ? 'Hello, this is a test' : 'Bonjour, ceci est un test';
+      document.getElementById('voxmsg').innerHTML = '';
+      say(txt, lg, m => document.getElementById('voxmsg').innerHTML =
+        `<p style="font-size:12.5px; color:var(--red); margin:8px 0 0;">${m}</p>`);
+    });
+  })();
+  document.getElementById('sy-mode').value = SYNC.mode || 'jsonbin';
+  document.getElementById('sy-save').onclick = async ()=>{
+    const url = document.getElementById('sy-url').value.trim();
+    const key = document.getElementById('sy-key').value.trim();
+    const mode= document.getElementById('sy-mode').value;
+    const btn = document.getElementById('sy-save'); btn.textContent = 'Test en cours…';
+    const prev = Object.assign({}, SYNC);
+    saveSyncSettings({url, key, mode});
+    if(!url){ btn.textContent='Enregistré (synchronisation désactivée)'; setTimeout(parents, 900); return; }
+    try{
+      const rem = await remoteGet();
+      DB = mergeDB(DB, (rem && typeof rem==='object') ? rem : {});
+      await dbSave(); await loadCode(); await loadCustom();
+      syncState = 'ok';
+      btn.textContent = '✓ Connecté';
+      setTimeout(parents, 900);
+    }catch(e){
+      syncState = 'hors ligne';
+      saveSyncSettings(prev);
+      alert("Connexion impossible. Vérifie l'adresse et la clé.\n\nDétail : " + (e.message||e));
+      btn.textContent = 'Tester et enregistrer';
+    }
+  };
+  const syPush = document.getElementById('sy-push');
+  if(syPush) syPush.onclick = async ()=>{
+    syPush.textContent = 'Envoi…';
+    try{ await remotePut(DB); syncState='ok'; syncError='';
+         alert("Envoyé. Le serveur contient maintenant exactement les données de cet appareil."); }
+    catch(e){ syncState='écriture refusée'; syncError=(e&&e.message)||String(e);
+         alert("Le serveur a refusé l'écriture.\n\n"+syncError+"\n\nVérifie la clé : elle doit autoriser la modification du bin."); }
+    parents();
+  };
+  const syNow = document.getElementById('sy-now');
+  if(syNow) syNow.onclick = async ()=>{
+    syNow.textContent = 'Synchronisation…';
+    try{ const rem = await remoteGet(); DB = mergeDB(DB, rem||{}); await dbSave();
+         await loadCode(); await loadCustom(); syncState='ok'; }
+    catch(e){ syncState='hors ligne'; }
+    parents();
+  };
+  document.getElementById('exp').onclick = exportData;
+  document.getElementById('impb').onclick = ()=>document.getElementById('imp').click();
+  document.getElementById('imp').onchange = e=>{
+    const f = e.target.files[0]; if(!f) return;
+    importData(f, ok => { alert(ok ? "Sauvegarde restaurée." : "Fichier illisible."); if(ok) parents(); });
+  };
+  document.getElementById('savecode').onclick = async ()=>{
+    await setCode(document.getElementById('code').value); parents();
+  };
+  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>editor(b.dataset.add));
+  document.querySelectorAll('[data-imp]').forEach(b=>b.onclick=()=>importer(b.dataset.imp));
+  document.querySelectorAll('[data-money]').forEach(b=>b.onclick=()=>moneyView(b.dataset.money));
+  document.querySelectorAll('[data-sess]').forEach(b=>b.onclick=()=>{
+    const [kid, ts] = b.dataset.sess.split('|'); session(kid, +ts);
+  });
+  document.querySelectorAll('[data-last]').forEach(b=>b.onclick=async ()=>{
+    const [kid, setId] = b.dataset.last.split('|');
+    const hs = ((await store.get(K.hist(kid))) || []).filter(h=>h.set===setId && h.qs);
+    if(!hs.length){ alert("Le détail question par question n'a pas encore été enregistré pour ce chapitre. Il le sera à la prochaine séance."); return; }
+    session(kid, hs[hs.length-1].ts);
+  });
+  const fileInput = document.getElementById('ph-file');
+  let photoFor = null;
+  document.querySelectorAll('[data-photo]').forEach(b=>b.onclick=()=>{
+    photoFor = b.dataset.photo;
+    fileInput.value = '';            // sinon le navigateur peut resservir le fichier précédent
+    fileInput.click();
+  });
+  fileInput.onchange = e => {
+    const f = e.target.files[0], kid = photoFor;
+    fileInput.value = '';
+    if(!f || !kid) return;
+    shrinkPhoto(f, 220, async data => {
+      if(!data){ alert("Cette image n'a pas pu être lue. Essaie une photo au format JPEG ou PNG."); return; }
+      const ko = Math.round(data.length/1024);
+      if(ko > 90){ alert("Photo trop lourde ("+ko+" Ko). Essaie une autre image."); return; }
+      await store.set(K.photo(kid), data);
+      PHOTOS[kid] = await store.get(K.photo(kid));   // on relit ce qui est vraiment enregistré
+      photoFor = null;
+      parents();
+    });
+  };
+  document.querySelectorAll('[data-nophoto]').forEach(b=>b.onclick=async ()=>{
+    const kid = b.dataset.nophoto;
+    PHOTOS[kid] = null; await store.set(K.photo(kid), null); parents();
+  });
+  document.querySelectorAll('[data-reset]').forEach(b=>b.onclick=async ()=>{
+    const kid = b.dataset.reset;
+    if(!confirm("Effacer toute la progression de "+DATA[kid].name+" ? Les chapitres que tu as créés sont conservés.")) return;
+    await store.set(K.prog(kid), {}, true); await store.set(K.hist(kid), [], true); parents();
+  });
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async ()=>{
+    const kid = b.dataset.kid, id = b.dataset.del;
+    if(!confirm("Supprimer ce chapitre ?")) return;
+    CUSTOM[kid] = CUSTOM[kid].filter(x=>x.id!==id); await saveCustom(kid); parents();
+  });
+}
+
+/* ---------------- cagnotte et tâches, côté parent ---------------- */
+async function moneyView(kid){
+  const v = DATA[kid];
+  await pullRemote(true); await loadMoney();
+  const w = WALLET[kid] || { balance:0, tx:[] };
+  const ts = TASKS[kid] || [];
+  const wait = ts.filter(t=>t.status==='pending'), todo = ts.filter(t=>t.status==='todo');
+  const dw = await dayWork(kid);
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Espace parent</button>
+    <span class="who" style="background:${v.hex}">Cagnotte · ${v.name}</span></div>
+
+  <div class="card" style="padding:18px; text-align:center; border-color:#E08A00;">
+    <div style="font-family:'Baloo 2',sans-serif; font-size:40px; color:#B45309; line-height:1.1;">${money(w.balance||0)}</div>
+    <p style="font-size:13px; color:var(--ink-soft); margin:2px 0 10px;">solde de ${v.name}</p>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+      <button class="tool" id="pay">💸 J'ai payé (retirer)</button>
+      <button class="tool" id="bonus">🎁 Bonus exceptionnel</button>
+    </div>
+    <p style="font-size:12px; color:var(--ink-soft); margin:8px 0 0;">
+      Aujourd'hui : ${dw.q} questions · ${dw.pct}% · récompense du jour ${dw.paid?'<b style="color:var(--green)">versée</b>':'pas encore atteinte'}</p>
+  </div>
+
+  ${wait.length?`<div class="card" style="padding:16px; margin-top:14px; border-color:var(--amber); background:#FFFBEB;">
+    <h3 style="font-size:16px; color:#B45309;">À valider (${wait.length})</h3>
+    ${wait.map(t=>`<div class="task" style="box-shadow:none;">
+      <span class="ti">${t.title}${t.note?`<br><small style="font-weight:400; color:var(--ink-soft)">${t.note}</small>`:''}</span>
+      <span class="pay">+${money(t.amount)}</span>
+      <button class="go" data-ok="${t.id}" style="background:var(--green)">Valider</button>
+      <button class="go" data-no="${t.id}" style="background:var(--red)">Refuser</button>
+    </div>`).join('')}
+  </div>`:''}
+
+  <div class="card" style="padding:16px; margin-top:14px;">
+    <h3 style="font-size:16px;">Donner une tâche à ${v.name}</h3>
+    <div class="field"><label>La tâche</label><input id="t-title" placeholder="Ranger ta chambre"></div>
+    <div class="field"><label>Précision (facultatif)</label><input id="t-note" placeholder="avant ce soir, lit fait et bureau rangé"></div>
+    <div class="field"><label>Récompense en ${REWARD.cur}</label><input id="t-amt" inputmode="decimal" placeholder="10"></div>
+    <button class="cta" id="t-add" style="background:${v.hex}">Ajouter la tâche</button>
+    ${todo.length?`<h4 style="font-size:14px; margin:14px 0 6px; color:var(--ink-soft);">En cours (${todo.length})</h4>
+      ${todo.map(t=>`<div class="task" style="box-shadow:none;">
+        <span class="ti">${t.title}</span><span class="pay">+${money(t.amount)}</span>
+        <button class="go" data-del="${t.id}" style="background:var(--ink-soft)">Retirer</button></div>`).join('')}`:''}
+  </div>
+
+  <div class="card" style="padding:16px; margin-top:14px;">
+    <h3 style="font-size:16px;">La récompense quotidienne</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;">Versée automatiquement une fois par jour si les deux conditions sont remplies. Réglage commun aux deux enfants.</p>
+    <div class="two">
+      <div class="field"><label>Montant</label><input id="r-amt" value="${REWARD.amount}" inputmode="decimal"></div>
+      <div class="field"><label>Questions minimum</label><input id="r-q" value="${REWARD.minQ}" inputmode="numeric"></div>
+      <div class="field"><label>Réussite minimum (%)</label><input id="r-p" value="${REWARD.minPct}" inputmode="numeric"></div>
+    </div>
+    <button class="tool on" id="r-save">Enregistrer</button>
+  </div>
+
+  <div class="card" style="padding:16px; margin-top:14px;">
+    <h3 style="font-size:16px;">Tous les mouvements</h3>
+    ${(w.tx||[]).slice().reverse().map(t=>`<div style="display:flex; gap:8px; padding:7px 2px; border-bottom:1px dotted #DDD8C8; font-size:13.5px;">
+        <span style="color:var(--ink-soft); white-space:nowrap;">${frDate(t.d)}</span>
+        <b style="flex:1">${t.label}</b>
+        <b style="color:${t.amount>=0?'var(--green)':'var(--red)'}">${t.amount>=0?'+':''}${money(t.amount)}</b>
+      </div>`).join('') || '<p style="font-size:13px; color:var(--ink-soft); margin:0;">Aucun mouvement.</p>'}
+  </div>`;
+
+  document.getElementById('bk').onclick = parents;
+  document.getElementById('pay').onclick = async ()=>{
+    const a = parseFloat((prompt("Montant versé à "+v.name+" (en "+REWARD.cur+") :","")||'').replace(',','.'));
+    if(!a || a<=0) return;
+    await credit(kid, "Versé par maman", -Math.abs(a), 'payout'); moneyView(kid);
+  };
+  document.getElementById('bonus').onclick = async ()=>{
+    const a = parseFloat((prompt("Montant du bonus (en "+REWARD.cur+") :","")||'').replace(',','.'));
+    if(!a || a<=0) return;
+    const l = prompt("Pourquoi ?","Bonus") || "Bonus";
+    await credit(kid, l, Math.abs(a), 'bonus'); moneyView(kid);
+  };
+  document.getElementById('t-add').onclick = async ()=>{
+    const title = document.getElementById('t-title').value.trim();
+    const note  = document.getElementById('t-note').value.trim();
+    const amt   = parseFloat((document.getElementById('t-amt').value||'').replace(',','.'));
+    if(!title){ alert("Écris la tâche."); return; }
+    if(!amt || amt<=0){ alert("Indique une récompense."); return; }
+    TASKS[kid].push({ id:'t-'+Date.now(), title, note, amount:amt, status:'todo', created:Date.now() });
+    await saveTasks(kid); moneyView(kid);
+  };
+  document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=async ()=>{
+    const t = TASKS[kid].find(x=>x.id===b.dataset.ok); if(!t) return;
+    t.status='done'; t.validatedAt=Date.now();
+    await credit(kid, "Tâche : "+t.title, t.amount, 'task');
+    await saveTasks(kid); moneyView(kid);
+  });
+  document.querySelectorAll('[data-no]').forEach(b=>b.onclick=async ()=>{
+    const t = TASKS[kid].find(x=>x.id===b.dataset.no); if(!t) return;
+    t.status='todo'; delete t.doneAt; await saveTasks(kid); moneyView(kid);
+  });
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async ()=>{
+    TASKS[kid] = TASKS[kid].filter(x=>x.id!==b.dataset.del); await saveTasks(kid); moneyView(kid);
+  });
+  document.getElementById('r-save').onclick = async ()=>{
+    const a = parseFloat((document.getElementById('r-amt').value||'').replace(',','.'));
+    const q = parseInt(document.getElementById('r-q').value,10);
+    const pc= parseInt(document.getElementById('r-p').value,10);
+    REWARD = { amount: (a>0?a:5), minQ: (q>0?q:20), minPct: (pc>0&&pc<=100?pc:70), cur: REWARD.cur };
+    await store.set(K.reward(), REWARD); moneyView(kid);
+  };
+}
+
+/* ---------------- le détail d'une séance ---------------- */
+async function session(kid, ts){
+  const v = DATA[kid];
+  const hist = (await store.get(K.hist(kid))) || [];
+  const h = hist.find(x => x.ts === ts);
+  if(!h){ parents(); return; }
+  const pc = Math.round(100*h.score/h.total);
+  const col = pc>=70?'var(--green)':pc>=50?'var(--amber)':'var(--red)';
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Espace parent</button>
+    <span class="who" style="background:${v.hex}">${v.name} · ${frDate(h.d)}</span></div>
+  <div class="card result" style="padding:22px 18px;">
+    <div class="circle"><span class="big">${h.score}/${h.total}</span></div>
+    <h2 style="font-size:21px; margin-top:14px;">${h.title||h.set}</h2>
+    <p>Séance du ${new Date(h.ts).toLocaleDateString('fr-FR',{weekday:'long', day:'numeric', month:'long'})}
+       à ${new Date(h.ts).toLocaleTimeString('fr-FR',{hour:'2-digit', minute:'2-digit'})}</p>
+  </div>
+  <div class="card" style="padding:16px; margin-top:14px;">
+    ${(h.qs||[]).map((x,i)=>`
+      <div style="display:flex; gap:10px; padding:10px 2px; border-bottom:1px dotted #DDD8C8;">
+        <b style="flex:none; width:22px; color:${x.ok?'var(--green)':'var(--red)'}; font-size:17px;">${x.ok?'✓':'✗'}</b>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:14px; font-weight:700;">${i+1}. ${x.q}</div>
+          <div style="font-size:13px; margin-top:2px;">
+            Sa réponse : <b style="color:${x.ok?'var(--green)':'var(--red)'}">${x.a || '—'}</b>
+            ${x.ok ? '' : ` &nbsp;·&nbsp; attendu : <b style="color:var(--green)">${x.c}</b>`}
+          </div>
+        </div>
+      </div>`).join('') || '<p style="font-size:13.5px; color:var(--ink-soft)">Le détail n\'a pas été enregistré pour cette séance.</p>'}
+  </div>
+  <p class="foot">Le détail question par question est conservé pour les 30 dernières séances de chaque enfant.</p>`;
+  document.getElementById('bk').onclick = parents;
+}
+
+/* ---------------- import d'un chapitre préparé (JSON) ---------------- */
+function checkChapter(o){
+  if(!o || typeof o!=='object') throw "ce n'est pas un chapitre";
+  if(!o.title) throw "il manque le titre (title)";
+  if(!Array.isArray(o.qs) || !o.qs.length) throw "il manque les questions (qs)";
+  o.qs.forEach((q,i)=>{
+    const n = 'question '+(i+1);
+    if(!q.q) throw "il manque l'énoncé de la "+n;
+    if(q.t==='choice'){
+      if(!Array.isArray(q.c) || q.c.length<2) throw "il faut au moins 2 propositions à la "+n;
+      if(typeof q.a!=='number' || q.a<0 || q.a>=q.c.length) throw "la bonne réponse de la "+n+" est hors de la liste";
+    } else if(q.t==='num'){
+      if(typeof q.a!=='number') throw "la réponse de la "+n+" doit être un nombre";
+    } else if(q.t==='text' || q.t==='sentence'){
+      if(!Array.isArray(q.a) || !q.a.length) throw "il manque la réponse de la "+n;
+    } else throw "type inconnu à la "+n+" (attendu : num, text, sentence ou choice)";
+  });
+  return true;
+}
+function importer(kid){
+  const v = DATA[kid];
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Espace parent</button>
+    <span class="who" style="background:${v.hex}">Importer · ${v.name}</span></div>
+  <div class="card" style="padding:18px 16px;">
+    <h2 style="font-size:20px;">Coller un chapitre</h2>
+    <p style="font-size:13px; margin:6px 0 0;">Colle ici le chapitre préparé (format JSON), ou choisis le fichier <b>.json</b> reçu.
+    Il s'ajoutera chez ${v.name} dans « My chapters » et se synchronisera sur tous les appareils.</p>
+    <div class="field"><textarea id="js" style="min-height:220px; font-family:ui-monospace,monospace; font-size:12.5px;" placeholder='{ "title": "...", "qs": [ ... ] }'></textarea></div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="tool" id="pick">📄 Choisir un fichier .json</button>
+      <input type="file" id="file" accept="application/json,.json" style="display:none">
+    </div>
+    <div id="msg" style="margin-top:10px;"></div>
+    <button class="cta" id="go" style="background:${v.hex}; margin-top:12px;">Vérifier et prévisualiser</button>
+  </div>`;
+  document.getElementById('bk').onclick = parents;
+  document.getElementById('pick').onclick = ()=>document.getElementById('file').click();
+  document.getElementById('file').onchange = e=>{
+    const f = e.target.files[0]; if(!f) return;
+    const fr = new FileReader();
+    fr.onload = ()=>{ document.getElementById('js').value = fr.result; };
+    fr.readAsText(f);
+  };
+  document.getElementById('go').onclick = async ()=>{
+    const msg = document.getElementById('msg');
+    let data;
+    try{ data = JSON.parse(document.getElementById('js').value); }
+    catch(e){ msg.innerHTML = `<div class="fb no"><span class="mark">${cross()}</span><span><h3>Fichier illisible</h3><p>Le texte collé n'est pas du JSON valide.</p></span></div>`; return; }
+    const list = Array.isArray(data) ? data : [data];
+    try{ list.forEach(checkChapter); }
+    catch(err){ msg.innerHTML = `<div class="fb no"><span class="mark">${cross()}</span><span><h3>Chapitre incomplet</h3><p>${err}</p></span></div>`; return; }
+    // aperçu avant d'ajouter
+    const n = list.reduce((a,o)=>a+o.qs.length,0);
+    const sol = q => q.t==='choice' ? q.c[q.a] : (q.t==='num' ? String(q.a) : q.a.join(' / '));
+    msg.innerHTML = `
+      <div class="fb ok" style="margin-bottom:12px;"><span class="mark">${tick()}</span><span>
+        <h3>Fichier valide</h3><p>${list.length} chapitre(s), ${n} questions. Relis ci-dessous avant d'ajouter.</p></span></div>
+      ${list.map(o=>`
+        <div class="card" style="padding:14px; margin-bottom:12px;">
+          <h3 style="font-size:17px; color:${v.hex}">${o.title||'(sans titre)'}</h3>
+          <div style="font-size:12.5px; color:var(--ink-soft)">${o.titleFr||''} · ${o.subject||'My chapters'} · ${o.qs.length} questions</div>
+          ${o.qs.map((q,i)=>`
+            <div style="padding:9px 0; border-bottom:1px dotted #DDD8C8;">
+              <div style="font-size:14px; font-weight:700;">${i+1}. ${q.q}</div>
+              ${q.fr?`<div style="font-size:12.5px;" class="fr">${q.fr}</div>`:''}
+              ${q.c?`<div style="font-size:12.5px; margin-top:3px;">Propositions : ${q.c.join(' &nbsp;·&nbsp; ')}</div>`:''}
+              <div style="font-size:13px; margin-top:3px;">Réponse : <b style="color:var(--green)">${sol(q)}</b>${q.say?` &nbsp;·&nbsp; 🔊 ${q.say}`:''}</div>
+              ${q.e?`<div style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">${q.e}</div>`:''}
+            </div>`).join('')}
+        </div>`).join('')}
+      <button class="cta" id="confirm" style="background:${v.hex}">Ajouter chez ${v.name}</button>`;
+    document.getElementById('confirm').onclick = async ()=>{
+      list.forEach(o=>{
+        o.id = o.id || ('p-'+Date.now()+'-'+Math.floor(Math.random()*999));
+        o.custom = true; o.subject = o.subject || 'My chapters';
+        o.sub = o.sub || o.subject; o.titleFr = o.titleFr || ''; o.subFr = o.subFr || '';
+        CUSTOM[kid].push(o);
+      });
+      await saveCustom(kid);
+      const envoye = SYNCLOG.length && SYNCLOG[SYNCLOG.length-1].ok;
+      msg.innerHTML = `<div class="fb ${envoye?'ok':'no'}"><span class="mark">${envoye?tick():cross()}</span><span>
+        <h3>${envoye?'Ajouté et envoyé !':'Ajouté sur cet appareil seulement'}</h3>
+        <p>${list.length} chapitre(s), ${n} questions, chez ${v.name}.</p>
+        ${envoye?'':`<p style="color:var(--red)"><b>L'envoi au serveur a échoué</b> — les autres appareils ne le verront pas.<br>${syncError||'synchronisation non configurée'}</p>`}</span></div>`;
+      setTimeout(parents, 1200);
+    };
+  };
+}
+
+/* ---------------- éditeur de chapitre ---------------- */
+let E = null;
+function editor(kid){
+  E = E && E.kid===kid ? E : { kid, subject:'Maths', title:'', titleFr:'', sub:'', subFr:'', qs:[] };
+  drawEditor();
+}
+function drawEditor(){
+  const v = DATA[E.kid];
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Espace parent</button>
+    <span class="who" style="background:${v.hex}">Nouveau chapitre · ${v.name}</span></div>
+  <div class="card" style="padding:18px 16px;">
+    <h2 style="font-size:20px;">Le chapitre</h2>
+    <div class="field"><label>Matière</label>
+      <select id="f-subject"><option>Maths</option><option>English</option><option>Science</option><option>French</option></select></div>
+    <div class="field"><label>Titre en anglais (vu par l'enfant)</label><input id="f-title" value="${E.title}" placeholder="Fractions"></div>
+    <div class="field"><label>Traduction française (le petit i)</label><input id="f-titleFr" value="${E.titleFr}" placeholder="Les fractions"></div>
+    <div class="field"><label>Sous-titre en anglais</label><input id="f-sub" value="${E.sub}" placeholder="Adding simple fractions"></div>
+    <div class="field"><label>Sous-titre en français</label><input id="f-subFr" value="${E.subFr}" placeholder="Additionner des fractions simples"></div>
+  </div>
+
+  <div class="card" style="padding:18px 16px; margin-top:14px;">
+    <h2 style="font-size:20px;">Ajouter une question</h2>
+    <div class="field"><label>Type de réponse</label>
+      <select id="q-type">
+        <option value="num">Un nombre</option>
+        <option value="text">Un mot ou une expression</option>
+        <option value="choice">Choix multiple</option>
+      </select></div>
+    <div class="field"><label>Question, en anglais</label><textarea id="q-q" placeholder="What is 1/2 + 1/4?"></textarea></div>
+    <div class="field"><label>Traduction française (facultatif)</label><input id="q-fr" placeholder="Combien font 1/2 + 1/4 ?"></div>
+    <div class="field"><label>Mot ou phrase à écouter 🔊 (facultatif)</label><input id="q-say" placeholder="a butterfly"></div>
+    <div class="field"><label>Langue de la voix</label>
+      <select id="q-lang"><option value="en-GB">Anglais</option><option value="ar-SA">Arabe</option><option value="fr-FR">Français</option></select></div>
+    <div id="q-ans"></div>
+    <div class="field"><label>Explication en français (affichée après la réponse)</label>
+      <textarea id="q-e" placeholder="On met les fractions au même dénominateur…"></textarea></div>
+    <button class="cta" id="q-add" style="background:${v.hex}">Ajouter cette question</button>
+  </div>
+
+  <div class="card" style="padding:18px 16px; margin-top:14px;">
+    <h2 style="font-size:20px;">Questions du chapitre (${E.qs.length})</h2>
+    ${E.qs.length ? E.qs.map((q,i)=>`<div class="qrow"><b>${i+1}. ${q.q}<br><small style="color:var(--ink-soft)">réponse : ${
+        q.t==='choice' ? q.c[q.a] : (q.t==='num' ? q.a : q.a.join(' / '))}</small></b>
+      <button class="del" data-q="${i}">✕</button></div>`).join('')
+      : '<p style="font-size:13.5px; color:var(--ink-soft)">Aucune question pour le moment.</p>'}
+    <button class="cta" id="save" style="background:var(--ink); margin-top:14px;">Enregistrer le chapitre</button>
+  </div>`;
+
+  document.getElementById('bk').onclick = ()=>{ parents(); };
+  document.getElementById('f-subject').value = E.subject;
+  const drawAns = () => {
+    const t = document.getElementById('q-type').value;
+    document.getElementById('q-ans').innerHTML =
+      t==='num' ? `<div class="field"><label>La bonne réponse (un nombre, − pour négatif)</label><input id="q-a" inputmode="text" placeholder="-3"></div>`
+    : t==='text'? `<div class="field"><label>Réponses acceptées, séparées par des points-virgules</label><input id="q-a" placeholder="spoke ; he spoke"></div>`
+    : `<div class="field"><label>Les propositions (une par ligne, mets la bonne en premier)</label>
+       <textarea id="q-a" placeholder="its&#10;it's"></textarea></div>`;
+  };
+  document.getElementById('q-type').onchange = drawAns; drawAns();
+
+  document.getElementById('q-add').onclick = ()=>{
+    const t = document.getElementById('q-type').value;
+    const qt = document.getElementById('q-q').value.trim();
+    const fr = document.getElementById('q-fr').value.trim();
+    const e  = document.getElementById('q-e').value.trim();
+    const raw= document.getElementById('q-a').value.trim();
+    if(!qt || !raw){ alert("Il faut au moins la question et la réponse."); return; }
+    let q;
+    if(t==='num'){
+      const n = parseFloat(raw.replace(/−/g,'-').replace(',','.'));
+      if(isNaN(n)){ alert("La réponse doit être un nombre."); return; }
+      q = { t:'num', q:qt, a:n };
+    } else if(t==='text'){
+      q = { t:'text', q:qt, a: raw.split(';').map(x=>x.trim()).filter(Boolean) };
+    } else {
+      const opts = raw.split('\n').map(x=>x.trim()).filter(Boolean);
+      if(opts.length<2){ alert("Mets au moins deux propositions."); return; }
+      const good = opts[0];
+      const mixed = opts.slice().sort(()=>Math.random()-0.5);
+      q = { t:'choice', q:qt, c:mixed, a:mixed.indexOf(good) };
+    }
+    const sy = document.getElementById('q-say').value.trim();
+    if(fr) q.fr  = fr;
+    if(e)  q.e   = e;
+    if(sy){ q.say = sy; q.lang = document.getElementById('q-lang').value; }
+    E.qs.push(q); drawEditor();
+  };
+  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ E.qs.splice(+b.dataset.q,1); drawEditor(); });
+
+  ['subject','title','titleFr','sub','subFr'].forEach(f=>{
+    const el = document.getElementById('f-'+f);
+    el.addEventListener('input', ()=>{ E[f] = el.value; });
+    el.addEventListener('change', ()=>{ E[f] = el.value; });
+  });
+
+  document.getElementById('save').onclick = async ()=>{
+    ['subject','title','titleFr','sub','subFr'].forEach(f=>{ E[f] = document.getElementById('f-'+f).value.trim(); });
+    if(!E.title){ alert("Donne un titre au chapitre."); return; }
+    if(!E.qs.length){ alert("Ajoute au moins une question."); return; }
+    const st = { id:'p-'+Date.now(), custom:true, subject:E.subject,
+                 title:E.title, titleFr:E.titleFr, sub:E.sub||E.subject, subFr:E.subFr, qs:E.qs };
+    CUSTOM[E.kid].push(st); await saveCustom(E.kid);
+    const kid = E.kid; E = null;
+    alert("Chapitre enregistré ! Il apparaît chez "+DATA[kid].name+" dans « My chapters ».");
+    parents();
+  };
+}
+
+
+(async function init(){
+  loadSyncSettings();
+  await dbLoad();
+  // reprise des données enregistrées par les versions précédentes (une clé par entrée)
+  if(hasArtifact && !Object.keys(DB).length){
+    const tryKey = async (k) => { try{ const r = await window.storage.get(k, true); return r?JSON.parse(r.value):null; }catch(e){ return null; } };
+    const code = (await tryKey('cahier:code')) || 'famille';
+    const found = {};
+    for(const kid of ['lina','ilyes']){
+      for(const kind of ['prog','hist','sets']){
+        const v = await tryKey(`c:${code}:${kind}:${kid}`);
+        if(v) found[`c:${code}:${kind}:${kid}`] = v;
+      }
+      const older = await tryKey('cahier:'+kid);
+      if(older && !found[`c:${code}:prog:${kid}`]) found[`c:${code}:prog:${kid}`] = older;
+    }
+    if(Object.keys(found).length){ found['cahier:code'] = code; DB = Object.assign(DB, found); await dbSave(); }
+  }
+  await loadCode(); await loadCustom(); await loadMoney();
+  home();
+})();
+</script>
+</body>
+</html>
