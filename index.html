@@ -1124,11 +1124,32 @@ async function bilanTexte(kid){
 
 /* ---- l'examen : un tirage dans TOUTES les matières ---- */
 const melange = a => a.slice().sort(()=>Math.random()-0.5);
+/* le classement des matières, partagé par le menu et l'examen */
+function subjectsOf(kid){
+  const subs = DATA[kid].subjects.map(su => Object.assign({}, su, { sets: su.sets.slice() }));
+  const norm = t => (t||'').toLowerCase().replace(/[^a-z]/g,'');
+  const orphelins = [];
+  (CUSTOM[kid]||[]).forEach(st => {
+    const cible = subs.find(su => norm(su.name) === norm(st.subject)
+                               || (norm(st.subject) && norm(su.name).indexOf(norm(st.subject)) >= 0)
+                               || (norm(st.subject) && norm(st.subject).indexOf(norm(su.name)) >= 0));
+    if(cible) cible.sets.push(st); else orphelins.push(st);
+  });
+  const parMatiere = {};
+  orphelins.forEach(st => {
+    const nom = (st.subject || '').trim() || 'My chapters';
+    (parMatiere[nom] = parMatiere[nom] || []).push(st);
+  });
+  Object.keys(parMatiere).forEach(nom => subs.push({
+    name: nom, note:'Chapters added by your parent',
+    noteFr: nom==='My chapters' ? 'Les chapitres ajoutés par tes parents' : 'Ajouté par tes parents',
+    sets: parMatiere[nom]
+  }));
+  return subs;
+}
 function toutesLesQuestions(kid){
   const out = [];
-  const subs = DATA[kid].subjects.map(su=>({ name:su.name, sets:su.sets }))
-                 .concat([{ name:'Mes chapitres', sets: CUSTOM[kid] || [] }]);
-  subs.forEach(su => su.sets.forEach(st => {
+  subjectsOf(kid).forEach(su => su.sets.forEach(st => {
     if(st.learn) return;
     st.qs.forEach(q => out.push({ q, su: su.name }));
   }));
@@ -1222,11 +1243,16 @@ function srsUpdate(k, ok){
 function dailyStats(st){
   const items = st.qs.map(q=>hashQ(q.q));
   const now = Date.now();
+  // chaque bonne réponse fait avancer la barre ; 3 bonnes réponses espacées = mot acquis
+  let force = 0;
+  items.forEach(k => { const r = SRS[k]; if(r) force += Math.min(r.s||0, 3); });
   return { total: items.length,
            appris: items.filter(k=>SRS[k] && SRS[k].s >= 3).length,
+           encours:items.filter(k=>SRS[k] && (SRS[k].s||0) > 0 && SRS[k].s < 3).length,
            vus:    items.filter(k=>SRS[k]).length,
            revoir: items.filter(k=>SRS[k] && SRS[k].due <= now).length,
-           neufs:  items.filter(k=>!SRS[k]).length };
+           neufs:  items.filter(k=>!SRS[k]).length,
+           pct:    items.length ? Math.round(100*force/(3*items.length)) : 0 };
 }
 function chooseDaily(st, n){
   n = n || 12;
@@ -1333,35 +1359,14 @@ async function menu(kid){
   const dw = await dayWork(kid);
   const todo = (TASKS[kid]||[]).filter(t => t.status === 'todo');
   const examPaid = examPaidToday(kid);
-  // on range chaque chapitre ajouté dans SA matière ; le reste va dans « My chapters »
-  const subs = v.subjects.map(su => Object.assign({}, su, { sets: su.sets.slice() }));
-  const norm = t => (t||'').toLowerCase().replace(/[^a-z]/g,'');
-  const orphelins = [];
-  (CUSTOM[kid]||[]).forEach(st => {
-    const cible = subs.find(su => norm(su.name) === norm(st.subject)
-                               || (norm(st.subject) && norm(su.name).indexOf(norm(st.subject)) >= 0)
-                               || (norm(st.subject) && norm(st.subject).indexOf(norm(su.name)) >= 0));
-    if(cible) cible.sets.push(st); else orphelins.push(st);
-  });
-  // une matière qui n'existe pas encore chez cet enfant est créée pour lui
-  const parMatiere = {};
-  orphelins.forEach(st => {
-    const nom = (st.subject || '').trim() || 'My chapters';
-    (parMatiere[nom] = parMatiere[nom] || []).push(st);
-  });
-  Object.keys(parMatiere).forEach(nom => subs.push({
-    name: nom,
-    note: nom==='My chapters' ? 'Chapters added by your parent' : 'Chapters added by your parent',
-    noteFr: nom==='My chapters' ? 'Les chapitres ajoutés par tes parents' : 'Ajouté par tes parents',
-    sets: parMatiere[nom]
-  }));
+  const subs = subjectsOf(kid);
 
   const card = (su, i) => {
     const sets = su.sets.filter(st=>!st.learn);
     const done = sets.filter(st=>progress[st.id]);
     const mastered = sets.filter(st=>{
       const p = progress[st.id];
-      if(st.daily){ const d = dailyStats(st); return d.appris/d.total >= 0.7; }
+      if(st.daily){ return dailyStats(st).pct >= 70; }
       return p && p.best/p.total >= 0.7; });
     const neuf = su.sets.filter(st=>st.custom && !progress[st.id]).length;
     const pct = sets.length ? Math.round(100*mastered.length/sets.length) : 0;
@@ -1521,8 +1526,8 @@ function subjectView(kid, i, subs){
             <small style="color:${v.hex}; font-weight:700;">Aujourd'hui : ${Math.min(st.perDay||12, d.revoir + d.neufs + d.vus)} questions
               ${d.revoir?` · ${d.revoir} à revoir`:''}${d.neufs?` · ${d.neufs} nouveaux mots`:''}</small>
             <span class="barw" style="display:block; height:8px; border-radius:99px; background:#E7E3D6; margin-top:6px; overflow:hidden;">
-              <i style="display:block; height:100%; width:${Math.max(3, Math.round(100*d.appris/d.total))}%; background:${v.hex}"></i></span>
-            <small>${d.appris} mot(s) appris sur ${d.total}</small>
+              <i style="display:block; height:100%; width:${Math.max(3, d.pct)}%; background:${v.hex}"></i></span>
+            <small><b>${d.pct}%</b> de la liste · ${d.vus} vu(s) sur ${d.total}${d.encours?` · ${d.encours} en cours`:''}${d.appris?` · <b style="color:var(--green)">${d.appris} bien su(s)</b>`:''}</small>
           </span>
         </button>`;
       }
@@ -1533,7 +1538,8 @@ function subjectView(kid, i, subs){
         <span class="stars">${[0,1,2].map(x=>`<span class="${x<stars?'on':''}">★</span>`).join('')}</span>
         ${p?`<span class="score">${p.best}/${p.total}</span>`:''}
       </button>`;}).join('')}
-  <p class="foot">${T("Three stars means the chapter is mastered.","Trois étoiles : le chapitre est maîtrisé.")}</p>`;
+  <p class="foot">${T("Three stars means the chapter is mastered.","Trois étoiles : le chapitre est maîtrisé.")}
+  ${su.sets.some(x=>x.daily)?`<br>${T("In a 🔁 chapter, a word is « bien su » after three correct answers on three different days.","Dans un chapitre 🔁, un mot est « bien su » après trois bonnes réponses, trois jours différents.")}`:''}</p>`;
   document.getElementById('bk').onclick = ()=>menu(kid);
   document.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{
     const st = findSet(b.dataset.set);
@@ -1990,7 +1996,7 @@ async function results(){
 }
 
 /* ============================================================ ESPACE PARENT */
-const VERSION = 'v29 · examen annoncé par matière';
+const VERSION = 'v31 · progression quotidienne corrigée';
 const KIDS = ['lina','ilyes'];
 const dayKey = d => { const z=new Date(d); return new Date(z.getTime()-z.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 const frDate = iso => new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
