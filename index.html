@@ -604,12 +604,28 @@ const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window;
 let VOICES = [];
 function refreshVoices(){ try{ VOICES = window.speechSynthesis.getVoices() || []; }catch(e){ VOICES = []; } }
 if(canSpeak){ refreshVoices(); try{ window.speechSynthesis.onvoiceschanged = refreshVoices; }catch(e){} }
+/* la voix préférée reste sur CET appareil : les voix installées diffèrent d'un appareil à l'autre */
+let VOIX = {};
+try{ VOIX = JSON.parse(localStorage.getItem('cahier-voix') || '{}') || {}; }catch(e){ VOIX = {}; }
+function saveVoix(){ try{ localStorage.setItem('cahier-voix', JSON.stringify(VOIX)); }catch(e){} }
+const voixDe = lang => (lang||'').split('-')[0].toLowerCase();
+function voixDispo(lang){
+  if(!VOICES.length) refreshVoices();
+  const p = voixDe(lang);
+  return VOICES.filter(v => v.lang && v.lang.toLowerCase().replace('_','-').startsWith(p));
+}
 function pickVoice(lang){
   if(!VOICES.length) refreshVoices();
-  const p = (lang||'').split('-')[0].toLowerCase();
+  const p = voixDe(lang);
+  const choisie = VOIX[p];
+  if(choisie){
+    const v = VOICES.find(x => (x.voiceURI || x.name) === choisie);
+    if(v) return v;                       // la voix choisie par le parent
+  }
   return VOICES.find(v => v.lang && v.lang.toLowerCase().replace('_','-') === (lang||'').toLowerCase())
       || VOICES.find(v => v.lang && v.lang.toLowerCase().startsWith(p)) || null;
 }
+const vitesseDe = lang => { const r = VOIX['rate:'+voixDe(lang)]; return (r>0.4 && r<1.6) ? r : 0.75; };
 /* iOS n'autorise la voix qu'après un premier geste de l'utilisateur */
 let audioReady = false;
 function unlockAudio(){
@@ -631,7 +647,7 @@ function say(txt, lang, onProblem){
   }
   try{
     const u = new SpeechSynthesisUtterance(txt);
-    u.lang = L; u.rate = 0.75; if(v) u.voice = v;
+    u.lang = L; u.rate = vitesseDe(L); if(v) u.voice = v;
     u.onerror = () => onProblem && onProblem("La lecture a été interrompue. Vérifie le volume et le mode silencieux.");
     window.speechSynthesis.cancel(); window.speechSynthesis.resume(); window.speechSynthesis.speak(u);
   }catch(e){ onProblem && onProblem("La lecture n'a pas pu démarrer."); }
@@ -2000,19 +2016,21 @@ function chatDraw(){
       ${CH.attente?`<div class="bub2 ai" style="opacity:.6">Coach Ben écrit…</div>`:''}
     </div>
 
-    ${sess.fini || n >= CHAT_MAX
-      ? `<div class="fb ok" style="margin-top:12px;"><span class="mark">${tick()}</span><span>
+    ${sess.fini ? `<div class="fb ok" style="margin-top:12px;"><span class="mark">${tick()}</span><span>
           <h3>${T("Session finished!","Session terminée !")}</h3>
-          <p>${T("You spoke English today. Come back tomorrow!","Tu as parlé anglais aujourd'hui. Reviens demain !")}</p></span></div>
-         <button class="cta ghost" id="home3" style="margin-top:10px;">${T("Back to menu","Retour au menu")}</button>`
-      : `<div style="margin-top:12px; display:flex; gap:8px; align-items:flex-end;">
+          <p>${T("You spoke English today — well done! You can keep chatting as long as you like.","Tu as parlé anglais aujourd'hui, bravo ! Tu peux continuer à discuter autant que tu veux.")}</p></span></div>` : ''}
+    ${`<div style="margin-top:12px; display:flex; gap:8px; align-items:flex-end;">
           <input id="say" placeholder="Write in English… · en anglais"
             style="flex:1; padding:13px; border:3px solid #E3D9C8; border-radius:14px; font-size:17px; font-family:inherit;">
           <button class="tool on" id="send" style="padding:13px 15px; font-size:17px;">➤</button>
         </div>
         ${micOK?`<button class="mic" id="mic" style="background:${v.hex}">🎤 Or speak · Ou parle au micro</button>`:''}
         <div id="cerr"></div>
-        <button class="tool" id="stop" style="margin-top:10px;">${T("Finish the session","Terminer la session")}</button>`}
+        ${sess.fini
+          ? `<button class="cta ghost" id="home3" style="margin-top:10px;">${T("Back to menu","Retour au menu")}</button>`
+          : `<button class="tool" id="stop" style="margin-top:10px;">${T("Finish the session","Terminer la session")}</button>`}`}
+    <details style="margin-top:10px;"><summary style="font-size:12.5px; color:var(--ink-soft); cursor:pointer;">🔊 Changer la voix de Coach Ben</summary>
+      <div id="vx2" style="margin-top:8px;"></div></details>
   </div>
   <p class="foot">${T("Coach Ben speaks simple English and always asks you a question.","Coach Ben parle anglais simplement et te pose toujours une question.")}</p>`;
 
@@ -2022,7 +2040,29 @@ function chatDraw(){
   document.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>say(sess.turns[+b.dataset.say].en, 'en-GB'));
   document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>
     document.querySelector('[data-b="'+b.dataset.tr+'"]').classList.toggle('open'));
+  (function voixCoach(){
+    const el = document.getElementById('vx2'); if(!el) return;
+    const vs = voixDispo('en-GB');
+    if(!vs.length){ el.innerHTML = '<p style="font-size:12.5px; color:var(--red)">Aucune voix anglaise sur cet appareil.</p>'; return; }
+    const act = VOIX['en'];
+    el.innerHTML = `<select id="vxs" style="width:100%; padding:9px; border:2px solid #E3D9C8; border-radius:11px; font-family:inherit; font-size:14px;">
+        <option value="">Voix par défaut</option>
+        ${vs.map(v=>`<option value="${(v.voiceURI||v.name).replace(/"/g,'&quot;')}"${act===(v.voiceURI||v.name)?' selected':''}>${v.name} (${v.lang})</option>`).join('')}
+      </select>
+      <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
+        <span style="font-size:12.5px; color:var(--ink-soft)">Vitesse</span>
+        <input type="range" id="vxr" min="0.5" max="1.2" step="0.05" value="${vitesseDe('en-GB')}" style="flex:1">
+        <button class="tool" id="vxt" style="padding:6px 11px; font-size:13px;">🔊 Essayer</button>
+      </div>`;
+    document.getElementById('vxs').onchange = e => {
+      if(e.target.value) VOIX['en'] = e.target.value; else delete VOIX['en'];
+      saveVoix(); say('Hello! I am Coach Ben.', 'en-GB');
+    };
+    document.getElementById('vxr').onchange = e => { VOIX['rate:en'] = parseFloat(e.target.value); saveVoix(); };
+    document.getElementById('vxt').onclick = () => say('Hello! I am Coach Ben. What is your favourite animal?', 'en-GB');
+  })();
   const inp = document.getElementById('say');
+  if(!inp) return;
   const envoie = ()=>{ const t = (inp.value||'').trim(); if(!t) return; inp.value=''; chatEnvoi(t); };
   if(inp){ inp.onkeydown = e => { if(e.key === 'Enter') envoie(); }; setTimeout(()=>{ try{inp.focus();}catch(e){} }, 60); }
   const sd = document.getElementById('send'); if(sd) sd.onclick = envoie;
@@ -2071,7 +2111,7 @@ async function coachParle(dernier){
     const r = parseCoach(out);
     CH.sess.turns.push({ r:'ai', en:r.en, fr:r.fr, fix:r.fix });
     CH.attente = false;
-    if(chatNb() >= CHAT_MAX) return chatFin();
+    if(chatNb() >= CHAT_MAX && !CH.sess.fini) return chatFin();   // on marque la session, sans couper
     chatDraw();
     await saveChat(CH.kid);
     say(r.en, 'en-GB');
@@ -2717,7 +2757,7 @@ async function results(){
 }
 
 /* ============================================================ ESPACE PARENT */
-const VERSION = 'v38 · le micro attend la fin de la phrase';
+const VERSION = 'v39 · voix au choix, conversation sans limite';
 const KIDS = ['lina','ilyes'];
 const dayKey = d => { const z=new Date(d); return new Date(z.getTime()-z.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 const frDate = iso => new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
@@ -2918,6 +2958,10 @@ async function parents(){
   <div class="card" style="padding:16px; margin-bottom:14px;">
     <h3 style="font-size:16px; margin-bottom:4px;">Voix de l'appareil 🔊</h3>
     <div id="voxinfo" style="font-size:13px;">Lecture en cours…</div>
+    <div id="voxchoix" style="margin-top:12px;"></div>
+    <p style="font-size:11.5px; color:var(--ink-soft); margin:8px 0 0;">
+      Le choix de la voix et de la vitesse reste sur cet appareil : les voix installées ne sont pas les mêmes
+      sur la tablette et sur l'ordinateur. À régler une fois sur chaque appareil.</p>
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
       <button class="tool" data-test="en-GB">Tester l'anglais</button>
       <button class="tool" data-test="ar-SA">Tester l'arabe</button>
@@ -2969,7 +3013,39 @@ async function parents(){
            Français : <b style="color:${has('fr')?'var(--green)':'var(--red)'}">${has('fr')?'disponible':'absent'}</b>
            <br><span style="font-size:11.5px; color:var(--ink-soft)">${langs.length} voix installées : ${langs.slice(0,12).join(', ')}</span>`;
     };
-    show(); setTimeout(show, 800);
+    const choix = () => {
+      const el = document.getElementById('voxchoix'); if(!el || !canSpeak) return;
+      const langues = [['en-GB','Anglais — Coach Ben et la lecture'],['ar-SA','Arabe'],['fr-FR','Français']];
+      el.innerHTML = langues.map(([lg,nom])=>{
+        const vs = voixDispo(lg);
+        if(!vs.length) return `<div style="font-size:13px; margin-bottom:8px;"><b>${nom}</b> —
+          <span style="color:var(--red)">aucune voix installée</span></div>`;
+        const cle = voixDe(lg), act = VOIX[cle];
+        return `<div style="margin-bottom:12px;">
+          <label style="font-size:13px; font-weight:700;">${nom}</label>
+          <select data-vx="${cle}" style="width:100%; padding:9px; border:2px solid #E3D9C8; border-radius:11px; font-family:inherit; font-size:14px; margin-top:4px;">
+            <option value="">Voix par défaut de l'appareil</option>
+            ${vs.map(v=>`<option value="${(v.voiceURI||v.name).replace(/"/g,'&quot;')}"${
+              act===(v.voiceURI||v.name)?' selected':''}>${v.name} (${v.lang})</option>`).join('')}
+          </select>
+          <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
+            <span style="font-size:12.5px; color:var(--ink-soft)">Vitesse</span>
+            <input type="range" min="0.5" max="1.2" step="0.05" value="${vitesseDe(lg)}" data-vr="${cle}" style="flex:1">
+            <button class="tool" data-vt="${lg}" style="padding:6px 11px; font-size:13px;">🔊 Essayer</button>
+          </div></div>`;}).join('');
+      el.querySelectorAll('[data-vx]').forEach(se=>se.onchange=()=>{
+        if(se.value) VOIX[se.dataset.vx] = se.value; else delete VOIX[se.dataset.vx];
+        saveVoix(); se.style.borderColor='var(--green)';
+      });
+      el.querySelectorAll('[data-vr]').forEach(r=>r.onchange=()=>{
+        VOIX['rate:'+r.dataset.vr] = parseFloat(r.value); saveVoix();
+      });
+      el.querySelectorAll('[data-vt]').forEach(b=>b.onclick=()=>{
+        const lg=b.dataset.vt;
+        say(lg.startsWith('ar')?'مَرْحَبًا، أَنَا صَوْتُكَ':lg.startsWith('en')?'Hello! I am Coach Ben. What is your favourite animal?':'Bonjour, ceci est ma voix.', lg);
+      });
+    };
+    show(); choix(); setTimeout(()=>{ show(); choix(); }, 900);
     document.querySelectorAll('[data-test]').forEach(b=>b.onclick=()=>{
       const lg = b.dataset.test;
       const txt = lg==='ar-SA' ? 'مرحبا' : lg==='en-GB' ? 'Hello, this is a test' : 'Bonjour, ceci est un test';
