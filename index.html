@@ -1346,23 +1346,70 @@ const addedOf = st => st.addedAt || (/^p-(\d+)/.test(st.id||'') ? +RegExp.$1 : 0
 /* ---- le micro : écouter l'enfant lire ou parler ---- */
 const SR = (typeof window !== 'undefined') && (window.SpeechRecognition || window.webkitSpeechRecognition);
 const micOK = !!SR;
-function ecoute(lang, onTexte, onFin, onErreur){
+/* Le micro du navigateur s'arrête à la première petite pause : beaucoup trop tôt
+   pour un enfant qui cherche ses mots. On l'écoute en continu, on recolle les
+   morceaux, et on ne conclut qu'après un vrai silence (ou quand l'enfant appuie). */
+function ecoute(lang, onTexte, onFin, onErreur, opts){
+  opts = opts || {};
+  const patience = opts.patience || 4000;   // silence à attendre avant de conclure
+  const maxi     = opts.maxi     || 45000;  // garde-fou : on ne tourne pas indéfiniment
   if(!micOK){ onErreur && onErreur('nomic'); return null; }
   let r;
   try{ r = new SR(); }catch(e){ onErreur && onErreur('nomic'); return null; }
   r.lang = lang || 'en-GB';
-  r.interimResults = false;
+  r.interimResults = true;                  // pour savoir qu'elle parle encore
   r.maxAlternatives = 4;
-  r.continuous = false;
-  r.onresult = e => {
-    const alts = [];
-    for(let i=0;i<e.results[0].length;i++) alts.push(e.results[0][i].transcript);
-    onTexte(alts);
+  r.continuous = true;                      // on ne s'arrête pas à la première pause
+
+  let fini = false, vivant = true, minuteur = null, butoir = null;
+  const blocs = [];                          // chaque bloc : ses variantes
+  const conclure = () => {
+    if(fini) return; fini = true; vivant = false;
+    clearTimeout(minuteur); clearTimeout(butoir);
+    try{ r.stop(); }catch(e){}
+    if(!blocs.length){ onErreur && onErreur('no-speech'); onFin && onFin(); return; }
+    // on reconstruit jusqu'à 4 phrases candidates en combinant les variantes de chaque bloc
+    const cands = [];
+    for(let k=0; k<4; k++){
+      const t = blocs.map(b => b[Math.min(k, b.length-1)]).join(' ').trim();
+      if(t && cands.indexOf(t) < 0) cands.push(t);
+    }
+    onTexte(cands);
+    onFin && onFin();
   };
-  r.onerror = e => onErreur && onErreur(e.error || 'erreur');
-  r.onend   = () => onFin && onFin();
-  try{ r.start(); }catch(e){ onErreur && onErreur('busy'); }
-  return r;
+  const reporter = () => { clearTimeout(minuteur); minuteur = setTimeout(conclure, patience); };
+  butoir = setTimeout(conclure, maxi);
+
+  r.onresult = e => {
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      const res = e.results[i];
+      if(res.isFinal){
+        const vs = [];
+        for(let j=0; j<res.length; j++) vs.push(res[j].transcript.trim());
+        if(vs[0]) blocs.push(vs);
+      } else if(opts.onPartiel){
+        opts.onPartiel(blocs.map(b=>b[0]).concat([res[0].transcript]).join(' ').trim());
+      }
+    }
+    reporter();
+  };
+  r.onerror = e => {
+    const err = e.error || 'erreur';
+    if(err === 'no-speech' || err === 'aborted') return;   // sans gravité : on continue d'écouter
+    vivant = false; fini = true;
+    clearTimeout(minuteur); clearTimeout(butoir);
+    onErreur && onErreur(err); onFin && onFin();
+  };
+  // le navigateur coupe tout seul au bout de quelques secondes : on relance tant qu'on écoute
+  r.onend = () => {
+    if(fini || !vivant){ return; }
+    setTimeout(()=>{ if(!fini && vivant){ try{ r.start(); }catch(e){ conclure(); } } }, 120);
+  };
+  try{ r.start(); }catch(e){ onErreur && onErreur('busy'); return null; }
+  reporter();
+  return { stop: conclure,
+           abort: () => { fini = true; vivant = false; clearTimeout(minuteur); clearTimeout(butoir);
+                          try{ r.abort(); }catch(e){} } };
 }
 const motNu = w => (w||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9']/g,'');
 /* compare ce qui était à lire et ce qui a été entendu, mot à mot.
@@ -1983,7 +2030,10 @@ function chatDraw(){
   const mc = document.getElementById('mic');
   if(mc) mc.onclick = ()=>{
     if(CH.ecoute){ try{ CH.rec.stop(); }catch(e){} return; }
-    CH.ecoute = true; mc.classList.add('rec'); mc.textContent = "🎤 I am listening… · Je t'écoute, appuie pour arrêter";
+    CH.ecoute = true; mc.classList.add('rec'); mc.textContent = "✓ I have finished · J'ai fini de parler";
+    const ce = document.getElementById('cerr');
+    if(ce) ce.innerHTML = `<p style="font-size:13px; color:var(--ink-soft); margin-top:8px;">Prends ton temps.</p>
+                           <p id="partiel2" style="font-size:15px; color:#1D4ED8; min-height:20px;"></p>`;
     CH.rec = ecoute('en-GB',
       alts => { CH.ecoute = false; chatEnvoi(alts[0]); },
       () => { CH.ecoute = false; const m = document.getElementById('mic');
@@ -1995,7 +2045,9 @@ function chatDraw(){
           : err==='no-speech' ? "Je n'ai rien entendu, réessaie."
           : "Le micro n'a pas marché. Tu peux écrire à la place."}</p>`;
         const m = document.getElementById('mic');
-        if(m){ m.classList.remove('rec'); m.textContent = '🎤 Or speak · Ou parle au micro'; } });
+        if(m){ m.classList.remove('rec'); m.textContent = '🎤 Or speak · Ou parle au micro'; } },
+      { patience: 4000,
+        onPartiel: t => { const el = document.getElementById('partiel2'); if(el) el.textContent = t; } });
   };
 }
 async function chatEnvoi(txt){
@@ -2090,8 +2142,11 @@ function readingStep(){
   const go = document.getElementById('go');
   if(go) go.onclick = ()=>{
     if(RD.ecoute){ try{ RD.rec.stop(); }catch(e){} return; }
-    RD.ecoute = true; go.classList.add('rec'); go.textContent = "🎤 I am listening… · Je t'écoute, appuie pour arrêter";
-    document.getElementById('fb2').innerHTML = '';
+    RD.ecoute = true; go.classList.add('rec'); go.textContent = "✓ I have finished · J'ai fini de parler";
+    document.getElementById('fb2').innerHTML =
+      `<p style="font-size:13px; color:var(--ink-soft); margin-top:10px; text-align:center;">
+         Prends ton temps — j'attends que tu aies fini.</p>
+       <p id="partiel" style="font-size:15px; color:#1D4ED8; margin-top:4px; text-align:center; min-height:20px;"></p>`;
     RD.rec = ecoute('en-GB',
       alts => {
         const best = meilleureLecture(L.en, alts);
@@ -2116,7 +2171,9 @@ function readingStep(){
           : err==='nomic' ? "Ce navigateur ne sait pas écouter."
           : "Le micro n'a pas marché (" + err + "). Réessaie."}</p>`;
         const g = document.getElementById('go');
-        if(g){ g.classList.remove('rec'); g.textContent = '🎤 Read it aloud · Lis la phrase à voix haute'; } });
+        if(g){ g.classList.remove('rec'); g.textContent = '🎤 Read it aloud · Lis la phrase à voix haute'; } },
+      { patience: 5000,                       // un enfant qui lit s'arrête souvent au milieu
+        onPartiel: t => { const el = document.getElementById('partiel'); if(el) el.textContent = t; } });
   };
 }
 async function readingDone(){
@@ -2660,7 +2717,7 @@ async function results(){
 }
 
 /* ============================================================ ESPACE PARENT */
-const VERSION = 'v34 · devoirs, lecture à voix haute, Coach Ben';
+const VERSION = 'v38 · le micro attend la fin de la phrase';
 const KIDS = ['lina','ilyes'];
 const dayKey = d => { const z=new Date(d); return new Date(z.getTime()-z.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 const frDate = iso => new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
@@ -3512,8 +3569,10 @@ function checkChapter(o){
   });
   return true;
 }
-function importer(kid){
+async function importer(kid){
   const v = DATA[kid];
+  app.innerHTML = `<p style="padding:30px; text-align:center; color:var(--ink-soft)">Lecture des données…</p>`;
+  await pullRemote(true); await loadCustom();   // indispensable : sinon un import peut écraser l'existant
   app.innerHTML = `
   <div class="bar"><button class="back" id="bk">← Espace parent</button>
     <span class="who" style="background:${v.hex}">Importer · ${v.name}</span></div>
@@ -3544,13 +3603,29 @@ function importer(kid){
     catch(e){ msg.innerHTML = `<div class="fb no"><span class="mark">${cross()}</span><span><h3>Fichier illisible</h3><p>Le texte collé n'est pas du JSON valide.</p></span></div>`; return; }
     // un fichier peut contenir des devoirs : { "homework": [ ... ] }
     if(data && !Array.isArray(data) && Array.isArray(data.homework)){
-      const hws = data.homework.map((h,i) => Object.assign(
-        { id:'h-'+Date.now()+'-'+i, status:'todo', created:Date.now() }, h));
-      HW[kid] = (HW[kid]||[]).concat(hws);
-      await saveHW(kid);
-      msg.innerHTML = `<div class="fb ok"><span class="mark">${tick()}</span><span><h3>Devoirs ajoutés !</h3>
-        <p>${hws.length} devoir(s) chez ${v.name}.</p></span></div>`;
-      setTimeout(parents, 1400); return;
+      const cle = h => (h.title||'').trim().toLowerCase() + '|' + (h.due||'');
+      HW[kid] = HW[kid] || [];
+      const neufs = [], majs = [];
+      data.homework.forEach((h,i) => {
+        const vieux = HW[kid].find(x => cle(x) === cle(h));
+        if(vieux){
+          // le devoir existe déjà : on le met à JOUR (consigne, date, chapitre lié)
+          // sans toucher à ce que l'enfant a fait (son état, sa date de création)
+          Object.assign(vieux, h, { id:vieux.id, status:vieux.status, created:vieux.created,
+                                    doneAt:vieux.doneAt, validatedAt:vieux.validatedAt });
+          majs.push(h.title);
+        } else {
+          neufs.push(Object.assign({ id:'h-'+Date.now()+'-'+i, status:'todo', created:Date.now() }, h));
+        }
+      });
+      if(neufs.length) HW[kid] = HW[kid].concat(neufs);
+      if(neufs.length || majs.length) await saveHW(kid);
+      msg.innerHTML = `<div class="fb ok"><span class="mark">${tick()}</span><span>
+        <h3>${neufs.length ? neufs.length+' devoir(s) ajouté(s)' : ''}${neufs.length&&majs.length?' · ':''}${
+             majs.length ? majs.length+' mis à jour' : ''}${!neufs.length&&!majs.length?'Rien à changer':''} chez ${v.name}</h3>
+        <p>${v.name} a maintenant <b>${HW[kid].length} devoir(s)</b> au total.
+        ${majs.length ? '<br>Mis à jour : '+majs.join(' · ') : ''}</p></span></div>`;
+      setTimeout(()=>hwView(kid), 2200); return;
     }
     const list = Array.isArray(data) ? data : [data];
     try{ list.forEach(checkChapter); }
