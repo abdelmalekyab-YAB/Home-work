@@ -1666,9 +1666,10 @@ async function menu(kid){
       <b style="color:#B45309; font-size:14px;">Connexion au serveur impossible</b>
       <div style="font-size:12.5px; margin-top:3px;">L'appareil travaille hors ligne (${syncState}). Les nouveautés arriveront au retour du réseau.</div></div>` : '')}
   ${(()=>{ const l = hwTries(kid).filter(h => h.status !== 'done');
+     const vus = HWTOUT ? l : l.slice(0, 3);          // les 3 plus urgents, sauf si on déplie
      return l.length ? `<div class="hwcard">
-       <h3>📚 ${T("My homework","Mes devoirs")}</h3>
-       ${l.map(h=>{ const e = hwEtat(h);
+       <h3>📚 ${T("My homework","Mes devoirs")} <span style="font-weight:400; font-size:15px; color:var(--ink-soft)">· ${l.length}</span></h3>
+       ${vus.map(h=>{ const e = hwEtat(h);
          return `<div class="hwline" style="border-color:${e.col}">
            <span class="ht">${h.title}
              <small>${h.subject||''}${h.due?` · ${T("due","pour le")} ${frDate(h.due)}`:''}
@@ -1679,6 +1680,9 @@ async function menu(kid){
               ? `<span class="badge-wait">${T("checking…","à valider")}</span>`
               : `<button class="hb" data-hwdone="${h.id}" style="background:var(--green)">${T("Done!","C'est fait !")}</button>`}
          </div>`; }).join('')}
+       ${l.length > 3 ? `<button class="tool" id="hwplus" style="width:100%; margin-top:8px;">${
+         HWTOUT ? 'Show fewer · Voir moins'
+                : 'See the other '+(l.length-3)+' · Voir les '+(l.length-3)+' autres'}</button>` : ''}
      </div>` : ''; })()}
   ${miss.nb ? `<div class="mission">
     <div style="display:flex; align-items:baseline; gap:8px;">
@@ -1686,7 +1690,9 @@ async function menu(kid){
       <span style="margin-left:auto; font-family:'Baloo 2',sans-serif; font-size:17px; color:${miss.allDone?'var(--green)':'#B45309'};">${miss.faits}/${miss.nb}</span>
     </div>
     <p class="sub">${miss.allDone ? T("Everything is done. Brilliant!","Tout est fait. Magnifique !")
-                                  : T("Finish the three and the reward is yours.","Termine-les et la récompense du jour est à toi.")}</p>
+                                  : (miss.nb-miss.faits) === 1
+                                    ? T("One left, and the reward is yours.","Plus qu'un, et la récompense du jour est à toi.")
+                                    : T("Finish them all and the reward is yours.","Termine-les tous et la récompense du jour est à toi.")}</p>
     ${miss.tasks.map((t,i)=>`<button class="mtask ${t.done?'ok':''}" data-mission="${t.setId}">
       <span class="mi">${t.done?'✅':t.icon}</span>
       <span class="mt">${T(t.en, t.fr)}${t.su?`<small>${t.su}</small>`:''}</span>
@@ -1742,6 +1748,8 @@ async function menu(kid){
   <p class="foot">${T("Pick a subject, then a chapter.","Choisis une matière, puis un chapitre.")}</p>`;
   document.getElementById('bk').onclick = home;
   document.getElementById('wal').onclick = ()=>walletView(kid);
+  const hwp = document.getElementById('hwplus');
+  if(hwp) hwp.onclick = ()=>{ HWTOUT = !HWTOUT; menu(kid); };
   document.querySelectorAll('[data-hwdone]').forEach(b=>b.onclick=async ()=>{
     const h = (HW[kid]||[]).find(x=>x.id===b.dataset.hwdone); if(!h) return;
     h.status = 'pending'; h.doneAt = Date.now();
@@ -1861,6 +1869,7 @@ async function chatLogView(kid){
 /* ---------------- parler anglais avec le coach, 5 à 10 min ---------------- */
 const CHAT_MAX = 12;          // 12 réponses de l'enfant : à peu près 8 minutes
 let CH = null;
+let HWTOUT = false;      // la liste des devoirs est-elle dépliée ?
 
 function coachPrompt(kid){
   const v = DATA[kid];
@@ -3174,7 +3183,12 @@ async function hwView(kid){
       return `<div class="hwline" style="box-shadow:none; border-color:${e.col}">
         <span class="ht">${h.status==='done'?'✅ ':''}${h.title}
           <small>${h.subject||''}${h.due?` · pour le ${frDate(h.due)}`:''}${e.lab?` · <b style="color:${e.col}">${e.lab}</b>`:''}</small>
-          ${h.note?`<small>${h.note}</small>`:''}</span>
+          ${h.note?`<small>${h.note}</small>`:''}
+          <small style="display:block; margin-top:5px;">
+            <select data-lien="${h.id}" style="max-width:100%; font-size:12.5px; padding:5px 7px; border:2px solid #E3D9C8; border-radius:9px; font-family:inherit;">
+              <option value="">🔗 aucun chapitre d'entraînement</option>
+              ${chaps.map(c=>`<option value="${c.st.id}"${h.chapterId===c.st.id?' selected':''}>${c.su} · ${c.st.titleFr || c.st.title}</option>`).join('')}
+            </select></small></span>
         ${h.status==='pending'?`<button class="hb" data-ok="${h.id}" style="background:var(--green)">Valider</button>
                                 <button class="hb" data-no="${h.id}" style="background:var(--red)">Refuser</button>`:''}
         <button class="hb" data-del="${h.id}" style="background:var(--ink-soft)">✕</button>
@@ -3195,6 +3209,13 @@ async function hwView(kid){
       status:'todo', created:Date.now() });
     await saveHW(kid); hwView(kid);
   };
+  // rattacher (ou détacher) un chapitre d'entraînement à un devoir déjà créé
+  document.querySelectorAll('[data-lien]').forEach(sel=>sel.onchange=async ()=>{
+    const h = HW[kid].find(x=>x.id===sel.dataset.lien); if(!h) return;
+    h.chapterId = sel.value || '';
+    await saveHW(kid);
+    sel.style.borderColor = 'var(--green)';
+  });
   document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=async ()=>{
     const h = HW[kid].find(x=>x.id===b.dataset.ok); if(!h) return;
     h.status='done'; h.validatedAt=Date.now(); await saveHW(kid); hwView(kid);
@@ -3523,8 +3544,8 @@ function importer(kid){
     catch(e){ msg.innerHTML = `<div class="fb no"><span class="mark">${cross()}</span><span><h3>Fichier illisible</h3><p>Le texte collé n'est pas du JSON valide.</p></span></div>`; return; }
     // un fichier peut contenir des devoirs : { "homework": [ ... ] }
     if(data && !Array.isArray(data) && Array.isArray(data.homework)){
-      const hws = data.homework.map(h => Object.assign(
-        { id:'h-'+Date.now()+'-'+Math.floor(Math.random()*999), status:'todo', created:Date.now() }, h));
+      const hws = data.homework.map((h,i) => Object.assign(
+        { id:'h-'+Date.now()+'-'+i, status:'todo', created:Date.now() }, h));
       HW[kid] = (HW[kid]||[]).concat(hws);
       await saveHW(kid);
       msg.innerHTML = `<div class="fb ok"><span class="mark">${tick()}</span><span><h3>Devoirs ajoutés !</h3>
