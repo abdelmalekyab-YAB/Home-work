@@ -156,6 +156,38 @@ input.txt.done{background:#EAF7EF; border-bottom-color:var(--green); color:var(-
 .task .pay{font-family:'Baloo 2',sans-serif; font-size:17px; color:#B45309; white-space:nowrap;}
 .task .go{font-size:13.5px; font-weight:700; padding:8px 12px; border-radius:11px; color:#fff; border:none;}
 .badge-wait{font-size:11.5px; font-weight:700; color:#B45309; background:#FFF3B0; border-radius:999px; padding:3px 9px;}
+.phrase{font-size:clamp(22px,5.4vw,30px); font-family:'Baloo 2',sans-serif; font-weight:600; line-height:1.55; text-align:center;}
+.phrase span{padding:0 2px; border-radius:5px;}
+.phrase .good{color:var(--green);}
+.phrase .bad{color:var(--red); background:#FDE7E5; text-decoration:underline wavy var(--red);}
+.mic{display:block; width:100%; margin-top:14px; padding:18px; border-radius:18px; border:none; color:#fff;
+  font-family:'Baloo 2',sans-serif; font-size:21px; font-weight:600; box-shadow:0 5px 0 rgba(0,0,0,.18);}
+.mic:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.18);}
+.mic.rec{background:var(--red) !important; animation:puls 1s infinite;}
+@keyframes puls{50%{opacity:.72;}}
+.bub2{max-width:84%; padding:11px 14px; border-radius:16px; margin-bottom:10px; font-size:15px; line-height:1.45;}
+.bub2.ai{background:#EEF2FF; border:2px solid #4F46E5; border-bottom-left-radius:5px;}
+.bub2.me{background:#FFF3B0; border:2px solid #E08A00; border-bottom-right-radius:5px; margin-left:auto;}
+.bub2 .tr{font-size:12.5px; color:#1D4ED8; font-style:italic; margin-top:4px; display:none;}
+.bub2.open .tr{display:block;}
+.hwcard{border:3px solid #4F46E5; border-radius:18px; background:#EEF2FF; padding:14px 16px; margin-bottom:14px;}
+.hwcard h3{font-family:'Baloo 2',sans-serif; font-size:19px; color:#3730A3; margin:0;}
+.hwline{display:flex; align-items:center; gap:10px; background:#fff; border:2.5px solid #E7E3D6;
+  border-radius:13px; padding:10px 12px; margin-top:9px;}
+.hwline .ht{flex:1; min-width:0; font-size:14.5px; font-weight:700; line-height:1.3;}
+.hwline .ht small{display:block; font-size:12px; font-weight:400; color:var(--ink-soft); margin-top:1px;}
+.hwline .hb{font-size:13px; font-weight:700; padding:7px 11px; border-radius:10px; color:#fff; border:none;}
+.mission{border:3px solid #E08A00; border-radius:18px; background:#FFFBEB; padding:14px 16px; margin-bottom:14px;}
+.mission h3{font-family:'Baloo 2',sans-serif; font-size:20px; color:#B45309; margin:0;}
+.mission .sub{font-size:12.5px; color:var(--ink-soft); margin:2px 0 0;}
+.mtask{display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+  background:#fff; border:2.5px solid #E7E3D6; border-radius:13px; padding:10px 12px; margin-top:9px;}
+.mtask.ok{background:#EAF7EF; border-color:var(--green);}
+.mtask .mi{font-size:23px; flex:none;}
+.mtask .mt{flex:1; min-width:0; font-size:14.5px; font-weight:700; line-height:1.3;}
+.mtask .mt small{display:block; font-size:12px; font-weight:400; color:var(--ink-soft); margin-top:1px;}
+.mtask .mc{font-size:21px; flex:none;}
+.mdone{text-align:center; font-family:'Baloo 2',sans-serif; font-size:17px; color:var(--green); margin-top:10px;}
 .quote{border:2.5px solid var(--ink); border-radius:18px; background:#FFF8DC; padding:14px 16px; text-align:center; box-shadow:var(--shadow);}
 .quote .en{font-family:'Baloo 2',sans-serif; font-size:19px; font-weight:600; line-height:1.3;}
 .quote .fr{font-size:14px; margin-top:4px;}
@@ -987,16 +1019,20 @@ const store = {
 let CODE = 'famille';
 const K = { prog: k => `c:${CODE}:prog:${k}`, hist: k => `c:${CODE}:hist:${k}`,
             sets: k => `c:${CODE}:sets:${k}`, photo: k => `c:${CODE}:photo:${k}`,
-            srs:  k => `c:${CODE}:srs:${k}`,
+            srs:  k => `c:${CODE}:srs:${k}`, asked: k => `c:${CODE}:asked:${k}`, mission: k => `c:${CODE}:mission:${k}`, hw: k => `c:${CODE}:hw:${k}`, chat: k => `c:${CODE}:chat:${k}`,
             wallet: k => `c:${CODE}:wallet:${k}`, tasks: k => `c:${CODE}:tasks:${k}`,
-            reward: () => `c:${CODE}:reward` };
+            reward: () => `c:${CODE}:reward`, aikey: () => `c:${CODE}:aikey` };
 
 let progress = {};
 let CUSTOM = { lina:[], ilyes:[] };
 let PHOTOS = { lina:null, ilyes:null };
 let SRS = {};                       // mémoire d'apprentissage : quand revoir chaque mot
+let ASKED = {};                     // toutes les questions déjà posées : quand, combien de fois, ratées ?
 let WALLET = { lina:null, ilyes:null };   // cagnotte : solde + mouvements
 let TASKS  = { lina:[], ilyes:[] };       // tâches données par les parents
+let HW     = { lina:[], ilyes:[] };       // devoirs de l'école, avec une date limite
+let CHAT   = { lina:[], ilyes:[] };       // les conversations en anglais, une par jour
+let AISHARED = null;                      // clé IA partagée par le parent pour la tablette
 let REWARD = { amount:5, minQ:20, minPct:70, cur:'DH', exam:{ n:20, b:[[90,20],[75,15],[60,10]] } };
 const todayKey = () => { const n = new Date();
   return new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,10); };
@@ -1032,8 +1068,11 @@ async function dayWork(kid){
 }
 async function checkDailyReward(kid){
   const w = await dayWork(kid);
-  if(!w.paid && w.q >= REWARD.minQ && w.pct >= REWARD.minPct){
-    await credit(kid, "Travail du jour", REWARD.amount, 'day');
+  if(w.paid) return false;
+  let mission = false;
+  try{ mission = (await missionState(kid)).allDone; }catch(e){}
+  if(mission || (w.q >= REWARD.minQ && w.pct >= REWARD.minPct)){
+    await credit(kid, mission ? "Mission du jour accomplie" : "Travail du jour", REWARD.amount, 'day');
     return true;
   }
   return false;
@@ -1042,8 +1081,30 @@ async function checkDailyReward(kid){
 async function loadCode(){ CODE = (await store.get('cahier:code')) || 'famille'; }
 async function setCode(c){ CODE = (c||'famille').trim().toLowerCase(); await store.set('cahier:code', CODE); await loadCustom(); await loadMoney(); }
 async function loadCustom(){
-  for(const k of ['lina','ilyes']){ CUSTOM[k] = (await store.get(K.sets(k))) || []; PHOTOS[k] = (await store.get(K.photo(k))) || null; }
+  for(const k of ['lina','ilyes']){
+    CUSTOM[k] = (await store.get(K.sets(k)))  || [];
+    PHOTOS[k] = (await store.get(K.photo(k))) || null;
+    HW[k]     = (await store.get(K.hw(k)))    || [];
+    CHAT[k]   = (await store.get(K.chat(k)))   || [];
+  }
+  AISHARED = (await store.get(K.aikey())) || null;
 }
+async function saveHW(kid){ await store.set(K.hw(kid), HW[kid]); await pushNow('devoirs de '+kid); }
+/* un devoir : en retard, pour aujourd'hui, ou à venir */
+function hwEtat(h){
+  if(h.status === 'done') return { cle:3, lab:'fait', col:'var(--green)' };
+  if(h.status === 'pending') return { cle:0, lab:'à valider', col:'var(--amber)' };
+  if(!h.due) return { cle:2, lab:'', col:'var(--ink-soft)' };
+  const t = todayKey();
+  if(h.due < t)  return { cle:0, lab:'en retard', col:'var(--red)' };
+  if(h.due === t) return { cle:1, lab:"pour aujourd'hui", col:'var(--amber)' };
+  const j = Math.round((new Date(h.due) - new Date(t)) / 864e5);
+  return { cle:2, lab:'dans ' + j + ' jour' + (j>1?'s':''), col:'var(--ink-soft)' };
+}
+const hwTries = kid => (HW[kid]||[]).slice().sort((a,b)=>{
+  const ea = hwEtat(a), eb = hwEtat(b);
+  return ea.cle - eb.cle || String(a.due||'9').localeCompare(String(b.due||'9'));
+});
 /* la photo est redimensionnée en petit carré : elle doit rester légère pour la synchro */
 function shrinkPhoto(file, size, cb){
   const img = new Image();
@@ -1065,7 +1126,8 @@ function shrinkPhoto(file, size, cb){
 async function saveCustom(kid){ await store.set(K.sets(kid), CUSTOM[kid]); await pushNow('chapitres de '+kid); }
 async function loadProgress(kid){
   progress = (await store.get(K.prog(kid))) || {};
-  SRS = (await store.get(K.srs(kid))) || {};
+  SRS   = (await store.get(K.srs(kid)))   || {};
+  ASKED = (await store.get(K.asked(kid))) || {};
 }
 /* ---- intelligence artificielle : analyse et création de chapitres ----
    La clé reste sur CET appareil (jamais envoyée au serveur de synchro). */
@@ -1077,14 +1139,23 @@ function saveAI(o){ AI = Object.assign({provider:'claude', key:'', model:''}, o)
   try{ localStorage.setItem('cahier-ai', JSON.stringify(AI)); }catch(e){} }
 const AI_DEFAULT = { claude:'claude-sonnet-5', openai:'gpt-4o-mini' };
 
-async function askAI(system, prompt, maxTokens){
-  if(!AI.key) throw new Error("Aucune clé API enregistrée sur cet appareil.");
+function aiCfg(){
+  if(AI.key) return AI;
+  if(AISHARED && AISHARED.key) return AISHARED;
+  return null;
+}
+const aiPret = () => !!aiCfg();
+async function askAI(system, prompt, maxTokens){ return askAIChat(system, [{role:'user', content:prompt}], maxTokens); }
+async function askAIChat(system, msgs, maxTokens){
+  const AI = aiCfg();
+  if(!AI) throw new Error("Aucune clé API enregistrée sur cet appareil.");
+  const prompt = msgs[msgs.length-1].content;
   const model = AI.model || AI_DEFAULT[AI.provider];
   if(AI.provider === 'openai'){
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method:'POST',
       headers:{ 'content-type':'application/json', 'authorization':'Bearer '+AI.key },
-      body: JSON.stringify({ model, messages:[{role:'system',content:system},{role:'user',content:prompt}] })
+      body: JSON.stringify({ model, messages:[{role:'system',content:system}].concat(msgs) })
     });
     if(!r.ok) throw new Error('OpenAI ' + r.status + ' ' + (await r.text()).slice(0,160));
     const j = await r.json();
@@ -1094,8 +1165,7 @@ async function askAI(system, prompt, maxTokens){
     method:'POST',
     headers:{ 'content-type':'application/json', 'x-api-key':AI.key,
               'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-    body: JSON.stringify({ model, max_tokens: maxTokens||4000, system,
-                           messages:[{ role:'user', content: prompt }] })
+    body: JSON.stringify({ model, max_tokens: maxTokens||4000, system, messages: msgs })
   });
   if(!r.ok) throw new Error('Claude ' + r.status + ' ' + (await r.text()).slice(0,160));
   const j = await r.json();
@@ -1150,7 +1220,7 @@ function subjectsOf(kid){
 function toutesLesQuestions(kid){
   const out = [];
   subjectsOf(kid).forEach(su => su.sets.forEach(st => {
-    if(st.learn) return;
+    if(st.learn || st.reading) return;
     st.qs.forEach(q => out.push({ q, su: su.name }));
   }));
   return out;
@@ -1162,13 +1232,18 @@ function buildExam(kid, n){
   all.forEach(x => (par[x.su] = par[x.su] || []).push(x));
   const mats = Object.keys(par);
   const quota = Math.max(1, Math.floor(n / mats.length));
+  // on sert d'abord les questions les moins vues récemment : deux examens de suite ne se ressemblent pas
+  const anciennes = l => l.slice().sort((a,b) =>
+        (prioriteQ(hashQ(a.q.q)) - prioriteQ(hashQ(b.q.q))) || (Math.random() - 0.5));
   let pick = [];
-  mats.forEach(m => { pick = pick.concat(melange(par[m]).slice(0, quota)); });
+  mats.forEach(m => { pick = pick.concat(anciennes(par[m]).slice(0, quota)); });
   if(pick.length < n){
-    const reste = melange(all).filter(x => pick.indexOf(x) < 0);
+    const reste = anciennes(all).filter(x => pick.indexOf(x) < 0);
     pick = pick.concat(reste.slice(0, n - pick.length));
   }
-  return melange(pick).slice(0, n).map(x => { const c = Object.assign({}, x.q, { _su: x.su }); delete c.step; delete c._k; return c; });
+  return melange(pick).slice(0, n).map(x => {
+    const c = Object.assign({}, x.q, { _su: x.su, _k: hashQ(x.q.q) });
+    delete c.step; return c; });
 }
 function examPaidToday(kid){
   return ((WALLET[kid] && WALLET[kid].tx) || []).some(t => t.d === todayKey() && t.kind === 'exam');
@@ -1233,6 +1308,193 @@ function examBrief(kid){
 const hashQ = t => { let h = 5381; const x = (t||'').replace(/<[^>]+>/g,''); 
   for(let i=0;i<x.length;i++) h = ((h*33) ^ x.charCodeAt(i)) >>> 0; return h.toString(36); };
 const STEPS = [1, 2, 4, 8, 16, 30];     // en jours
+
+/* ---- on retient CHAQUE question posée, pour ne pas toujours redonner les mêmes ---- */
+function markAsked(k, ok){
+  const r = ASKED[k] || { n:0, w:0 };
+  r.n = (r.n||0) + 1;
+  if(!ok) r.w = (r.w||0) + 1;
+  r.ok = !!ok; r.t = Date.now();
+  ASKED[k] = r;
+}
+const joursDepuis = k => { const r = ASKED[k]; return r && r.t ? (Date.now()-r.t)/864e5 : 999; };
+/* priorité : jamais posée (0) < ratée la dernière fois (1) < ancienne < récente */
+function prioriteQ(k){
+  const r = ASKED[k];
+  if(!r) return 0;
+  if(r.ok === false) return 1;
+  return 2 + Math.max(0, 30 - joursDepuis(k)) / 30;
+}
+/* un chapitre normal : on varie l'ordre et, s'il est long, on n'en tire qu'une partie */
+function pickForSet(st){
+  const all = st.qs.map(q => ({ q, k: hashQ(q.q) }));
+  const n = Math.min(all.length, st.perRun || (all.length > 14 ? 12 : all.length));
+  const pick = all.slice()
+    .sort((a,b) => (prioriteQ(a.k) - prioriteQ(b.k)) || (Math.random() - 0.5))
+    .slice(0, n);
+  return melange(pick).map(x => Object.assign({}, x.q, { _k: x.k }));
+}
+
+/* un hasard stable pour toute la journée : la mission ne change pas si on rafraîchit */
+function seedOf(str){ let h = 2166136261;
+  for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0; }
+function rngFrom(seed){ let x = seed || 1;
+  return () => { x = (x*1664525 + 1013904223) >>> 0; return x / 4294967296; }; }
+const addedOf = st => st.addedAt || (/^p-(\d+)/.test(st.id||'') ? +RegExp.$1 : 0);
+
+/* ---- le micro : écouter l'enfant lire ou parler ---- */
+const SR = (typeof window !== 'undefined') && (window.SpeechRecognition || window.webkitSpeechRecognition);
+const micOK = !!SR;
+function ecoute(lang, onTexte, onFin, onErreur){
+  if(!micOK){ onErreur && onErreur('nomic'); return null; }
+  let r;
+  try{ r = new SR(); }catch(e){ onErreur && onErreur('nomic'); return null; }
+  r.lang = lang || 'en-GB';
+  r.interimResults = false;
+  r.maxAlternatives = 4;
+  r.continuous = false;
+  r.onresult = e => {
+    const alts = [];
+    for(let i=0;i<e.results[0].length;i++) alts.push(e.results[0][i].transcript);
+    onTexte(alts);
+  };
+  r.onerror = e => onErreur && onErreur(e.error || 'erreur');
+  r.onend   = () => onFin && onFin();
+  try{ r.start(); }catch(e){ onErreur && onErreur('busy'); }
+  return r;
+}
+const motNu = w => (w||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9']/g,'');
+/* compare ce qui était à lire et ce qui a été entendu, mot à mot.
+   ok[] suit les morceaux BRUTS de la phrase (émojis et ponctuation compris),
+   pour que les couleurs tombent exactement sur les bons mots à l'écran. */
+function compareMots(cible, dit){
+  const bruts = cible.split(/\s+/);
+  const T = bruts.map(motNu);                       // '' pour un émoji ou un signe seul
+  const S = dit.split(/\s+/).map(motNu).filter(Boolean);
+  const pris = new Array(S.length).fill(false);
+  let bons = 0, comptes = 0;
+  const ok = T.map(w => {
+    if(!w) return true;                             // rien à prononcer : jamais en rouge
+    comptes++;
+    let j = S.findIndex((x,i) => !pris[i] && x === w);
+    // on tolère une petite variation de fin : run/runs, like/liked, sister/sisters
+    if(j < 0 && w.length >= 3)
+      j = S.findIndex((x,i) => { if(pris[i] || x.length < 3) return false;
+        const n = Math.min(x.length, w.length);
+        return Math.abs(x.length - w.length) <= 2 && n >= 3 && x.slice(0, n) === w.slice(0, n); });
+    if(j >= 0){ pris[j] = true; bons++; return true; }
+    return false;
+  });
+  return { ok, pct: comptes ? Math.round(100*bons/comptes) : 0, mots: T.filter(Boolean) };
+}
+function meilleureLecture(cible, alts){
+  let best = { pct:-1 };
+  (alts||[]).forEach(a => { const r = compareMots(cible, a); if(r.pct > best.pct) best = Object.assign(r, { dit:a }); });
+  return best;
+}
+
+/* ---- la mission du jour : 2 à 4 objectifs clairs, les mêmes toute la journée ---- */
+function buildMission(kid){
+  const subs = subjectsOf(kid);
+  const all = [];
+  subs.forEach(su => su.sets.forEach(st => { if(!st.learn) all.push({ su:su.name, st }); }));
+  if(!all.length) return [];
+  const rnd = rngFrom(seedOf(todayKey() + kid));
+  const tasks = [];
+  const deja = id => tasks.some(t => t.setId === id);
+
+  const dailies = all.filter(x => x.st.daily);
+  if(dailies.length){
+    const x = dailies[Math.floor(rnd()*dailies.length) % dailies.length];
+    tasks.push({ setId:x.st.id, icon:'🔁', su:x.su,
+      fr:"L'entraînement du jour : " + (x.st.titleFr || x.st.title),
+      en:"Daily practice: " + x.st.title });
+  }
+  // 📖 lire à voix haute : une place réservée, tous les jours
+  const lect = all.filter(x => x.st.reading);
+  if(lect.length){
+    const jamaisLu = lect.filter(x => !progress[x.st.id]);
+    const pool = jamaisLu.length ? jamaisLu
+      : lect.slice().sort((a,b) => (progress[a.st.id].best/progress[a.st.id].total)
+                                 - (progress[b.st.id].best/progress[b.st.id].total));
+    const x = jamaisLu.length ? pool[Math.floor(rnd()*pool.length) % pool.length] : pool[0];
+    tasks.push({ setId:x.st.id, icon:'📖', su:x.su,
+      fr:"Lire à voix haute : " + (x.st.titleFr || x.st.title),
+      en:"Read aloud: " + x.st.title });
+  }
+  // 💬 parler anglais : une place réservée aussi, dès que la clé est partagée
+  if(aiPret())
+    tasks.push({ setId:'chat-en', icon:'💬', su:'English',
+      fr:"Parler anglais 5 minutes avec Coach Ben", en:"Speak English for 5 minutes with Coach Ben" });
+
+  const neufs = all.filter(x => x.st.custom && !x.st.daily && !x.st.reading && !progress[x.st.id])
+                   .sort((a,b) => addedOf(b.st) - addedOf(a.st));
+  if(neufs.length && !deja(neufs[0].st.id)){
+    const x = neufs[0];
+    tasks.push({ setId:x.st.id, icon:'✨', su:x.su,
+      fr:"Le nouveau chapitre : " + (x.st.titleFr || x.st.title),
+      en:"New chapter: " + x.st.title });
+  }
+  const faits = all.filter(x => !x.st.daily && !x.st.reading && progress[x.st.id] && !deja(x.st.id))
+    .map(x => ({ x, pc: progress[x.st.id].best / progress[x.st.id].total }))
+    .sort((a,b) => a.pc - b.pc);
+  const faible = faits.find(f => f.pc < 0.9);
+  if(faible){
+    tasks.push({ setId:faible.x.st.id, icon:'💪', su:faible.x.su,
+      fr:"Revoir : " + (faible.x.st.titleFr || faible.x.st.title) + " — " + Math.round(100*faible.pc) + "% la dernière fois",
+      en:"Review: " + faible.x.st.title });
+  } else {
+    const jamais = all.filter(x => !x.st.daily && !x.st.reading && !progress[x.st.id] && !deja(x.st.id));
+    if(jamais.length){
+      const x = jamais[Math.floor(rnd()*jamais.length) % jamais.length];
+      tasks.push({ setId:x.st.id, icon:'🆕', su:x.su,
+        fr:"Découvrir : " + (x.st.titleFr || x.st.title),
+        en:"Discover: " + x.st.title });
+    }
+  }
+  if(new Date().getDay() === 6)
+    tasks.push({ setId:'exam', icon:'📝', su:'', fr:"Le grand examen de la semaine", en:"The weekly big test" });
+  return tasks.slice(0, 5);
+}
+async function missionState(kid){
+  const hist  = (await store.get(K.hist(kid))) || [];
+  const today = todayKey();
+  const saved = await store.get(K.mission(kid));
+  let tasks;
+  // la mission est FIGÉE pour la journée : elle ne doit pas bouger pendant que l'enfant travaille
+  const horsChapitre = id => id === 'exam' || id === 'chat-en';   // ces tâches ne sont pas des chapitres
+  if(saved && saved.d === today && Array.isArray(saved.tasks) && saved.tasks.length){
+    tasks = saved.tasks
+      .filter(t => horsChapitre(t.setId) || findSetFor(kid, t.setId))
+      .map(t => Object.assign({}, t));
+  }
+  if(!tasks || !tasks.length){
+    tasks = buildMission(kid);
+    if(tasks.length) await store.set(K.mission(kid), { d: today, tasks });
+  }
+  // la conversation suit la clé : elle apparaît dès que le parent la partage,
+  // et disparaît s'il la retire — même si la mission du jour est déjà figée.
+  const aChat = tasks.some(t => t.setId === 'chat-en');
+  if(aiPret() && !aChat){
+    const i = Math.min(tasks.length, 2);
+    tasks.splice(i, 0, { setId:'chat-en', icon:'💬', su:'English',
+      fr:"Parler anglais 5 minutes avec Coach Ben", en:"Speak English for 5 minutes with Coach Ben" });
+    await store.set(K.mission(kid), { d: today, tasks });
+  } else if(!aiPret() && aChat){
+    tasks = tasks.filter(t => t.setId !== 'chat-en');
+    await store.set(K.mission(kid), { d: today, tasks });
+  }
+  const ht = hist.filter(h => h.d === today);
+  tasks.forEach(t => { t.done = ht.some(h => h.set === t.setId); });
+  return { tasks, nb: tasks.length, faits: tasks.filter(t=>t.done).length,
+           allDone: tasks.length > 0 && tasks.every(t => t.done) };
+}
+/* retrouve un chapitre sans dépendre de l'enfant en cours d'écran */
+function findSetFor(kid, id){
+  for(const su of DATA[kid].subjects) for(const st of su.sets) if(st.id === id) return st;
+  return (CUSTOM[kid]||[]).find(st => st.id === id);
+}
 function srsUpdate(k, ok){
   const r = SRS[k] || { s:0, n:0, w:0 };
   if(ok){ r.s = (r.s||0)+1; r.n = (r.n||0)+1; } else { r.s = 0; r.w = (r.w||0)+1; }
@@ -1360,6 +1622,7 @@ async function menu(kid){
   const todo = (TASKS[kid]||[]).filter(t => t.status === 'todo');
   const examPaid = examPaidToday(kid);
   const subs = subjectsOf(kid);
+  const miss = await missionState(kid);
 
   const card = (su, i) => {
     const sets = su.sets.filter(st=>!st.learn);
@@ -1402,6 +1665,35 @@ async function menu(kid){
     : (syncState !== 'ok' ? `<div class="card" style="padding:12px 14px; margin-bottom:12px; border-color:var(--amber); background:#FFFBEB;">
       <b style="color:#B45309; font-size:14px;">Connexion au serveur impossible</b>
       <div style="font-size:12.5px; margin-top:3px;">L'appareil travaille hors ligne (${syncState}). Les nouveautés arriveront au retour du réseau.</div></div>` : '')}
+  ${(()=>{ const l = hwTries(kid).filter(h => h.status !== 'done');
+     return l.length ? `<div class="hwcard">
+       <h3>📚 ${T("My homework","Mes devoirs")}</h3>
+       ${l.map(h=>{ const e = hwEtat(h);
+         return `<div class="hwline" style="border-color:${e.col}">
+           <span class="ht">${h.title}
+             <small>${h.subject||''}${h.due?` · ${T("due","pour le")} ${frDate(h.due)}`:''}
+               ${e.lab?` · <b style="color:${e.col}">${e.lab}</b>`:''}</small>
+             ${h.note?`<small>${h.note}</small>`:''}</span>
+           ${h.chapterId ? `<button class="hb" data-hwgo="${h.chapterId}" style="background:${v.hex}">${T("Practise","S'entraîner")}</button>` : ''}
+           ${h.status==='pending'
+              ? `<span class="badge-wait">${T("checking…","à valider")}</span>`
+              : `<button class="hb" data-hwdone="${h.id}" style="background:var(--green)">${T("Done!","C'est fait !")}</button>`}
+         </div>`; }).join('')}
+     </div>` : ''; })()}
+  ${miss.nb ? `<div class="mission">
+    <div style="display:flex; align-items:baseline; gap:8px;">
+      <h3>🎯 ${T("Today's mission","La mission du jour")}</h3>
+      <span style="margin-left:auto; font-family:'Baloo 2',sans-serif; font-size:17px; color:${miss.allDone?'var(--green)':'#B45309'};">${miss.faits}/${miss.nb}</span>
+    </div>
+    <p class="sub">${miss.allDone ? T("Everything is done. Brilliant!","Tout est fait. Magnifique !")
+                                  : T("Finish the three and the reward is yours.","Termine-les et la récompense du jour est à toi.")}</p>
+    ${miss.tasks.map((t,i)=>`<button class="mtask ${t.done?'ok':''}" data-mission="${t.setId}">
+      <span class="mi">${t.done?'✅':t.icon}</span>
+      <span class="mt">${T(t.en, t.fr)}${t.su?`<small>${t.su}</small>`:''}</span>
+      <span class="mc" style="color:${t.done?'var(--green)':v.hex}">${t.done?'':'›'}</span>
+    </button>`).join('')}
+    ${miss.allDone?`<div class="mdone">🎉 ${T("Mission complete!","Mission accomplie !")}</div>`:''}
+  </div>` : ''}
   <div class="quote">
     <div class="en">${q.en}</div>
     <div class="fr">${q.fr}</div>
@@ -1423,6 +1715,18 @@ async function menu(kid){
     <span style="font-size:22px; color:#E08A00">›</span>
   </button>
   ${subs.map(card).join('')}
+  <button class="card subcard" id="chat" style="border-color:#0E7490">
+    <span class="ic" style="background:#0E7490">💬</span>
+    <span class="bd">
+      <span class="ti">${T("Speak English","Parler anglais")}</span>
+      <span class="st">${T("5 minutes with Coach Ben, every day","5 minutes avec Coach Ben, chaque jour")}</span>
+      <span class="msg" style="color:#0E7490">${(()=>{ const c = chatToday(kid);
+        return c && c.fini ? T("Done today — well done!","Fait aujourd'hui — bravo !")
+             : c && c.turns.length ? T("Session started, keep going!","Session commencée, continue !")
+             : T("He is waiting to talk to you!","Il attend de parler avec toi !"); })()}</span>
+    </span>
+    <span style="font-size:22px; color:#0E7490">›</span>
+  </button>
   <button class="card subcard" id="exam" style="border-color:#7C3AED">
     <span class="ic" style="background:#7C3AED">📝</span>
     <span class="bd">
@@ -1438,7 +1742,26 @@ async function menu(kid){
   <p class="foot">${T("Pick a subject, then a chapter.","Choisis une matière, puis un chapitre.")}</p>`;
   document.getElementById('bk').onclick = home;
   document.getElementById('wal').onclick = ()=>walletView(kid);
+  document.querySelectorAll('[data-hwdone]').forEach(b=>b.onclick=async ()=>{
+    const h = (HW[kid]||[]).find(x=>x.id===b.dataset.hwdone); if(!h) return;
+    h.status = 'pending'; h.doneAt = Date.now();
+    await saveHW(kid); menu(kid);
+  });
+  document.querySelectorAll('[data-hwgo]').forEach(b=>b.onclick=()=>{
+    const st = findSetFor(kid, b.dataset.hwgo);
+    if(!st) return alert("Ce chapitre n'est plus disponible.");
+    if(st.reading) readingView(st); else if(st.learn) alphabet(); else startSet(st.id);
+  });
+  document.querySelectorAll('[data-mission]').forEach(b=>b.onclick=()=>{
+    const id = b.dataset.mission;
+    if(id === 'exam') return examBrief(kid);
+    if(id === 'chat-en') return chatView(kid);
+    const st = findSetFor(kid, id);
+    if(st && st.reading) return readingView(st);
+    startSet(id);
+  });
   document.getElementById('exam').onclick = ()=>examBrief(kid);
+  document.getElementById('chat').onclick = ()=>chatView(kid);
   document.querySelectorAll('[data-su]').forEach(b=>b.onclick=()=>subjectView(kid, +b.dataset.su, subs));
 }
 
@@ -1504,6 +1827,325 @@ async function walletView(kid, forcer){
   });
 }
 
+/* le parent relit les conversations de la semaine */
+async function chatLogView(kid){
+  const v = DATA[kid];
+  const ses = (CHAT[kid]||[]).slice().reverse();
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Espace parent</button>
+    <span class="who" style="background:#0E7490">💬 Conversations · ${v.name}</span></div>
+  <div class="card" style="padding:16px;">
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 10px;">
+      Les 7 derniers jours. ✏️ marque une phrase que Coach Ben a corrigée : ce sont les points à retravailler.</p>
+    ${ses.length ? ses.map(c => {
+      const mes = c.turns.filter(t=>t.r==='me');
+      const fixes = c.turns.filter(t=>t.fix).map(t=>t.fix);
+      return `<details style="border:2px solid #CFE3E8; border-radius:14px; padding:10px 12px; margin-bottom:10px;">
+        <summary style="cursor:pointer; font-size:14.5px;">
+          <b>${new Date(c.d+'T12:00').toLocaleDateString('fr-FR',{weekday:'long', day:'numeric', month:'long'})}</b> · ${mes.length} phrase${mes.length>1?'s':''} en anglais
+          ${fixes.length?` · <span style="color:#B45309">${fixes.length} correction${fixes.length>1?'s':''}</span>`:''}
+          ${c.fini?' · <span style="color:var(--green)">terminée</span>':''}
+        </summary>
+        <div style="margin-top:10px; display:flex; flex-direction:column;">
+          ${c.turns.map(t=>`<div class="bub2 ${t.r==='me'?'me':'ai'}">
+            <div>${t.r==='me'?'':'<b>Coach Ben</b> '}${(t.en||'').replace(/</g,'&lt;')}</div>
+            ${t.fix?`<div style="font-size:12.5px; color:#B45309; margin-top:4px;">✏️ ${t.fix.replace(/</g,'&lt;')}</div>`:''}
+          </div>`).join('')}
+        </div>
+      </details>`; }).join('')
+    : '<p style="font-size:13.5px;">Aucune conversation pour le moment. L\'enfant doit ouvrir « Parler anglais » depuis son menu (la clé IA doit être partagée).</p>'}
+  </div>`;
+  document.getElementById('bk').onclick = parents;
+}
+
+/* ---------------- parler anglais avec le coach, 5 à 10 min ---------------- */
+const CHAT_MAX = 12;          // 12 réponses de l'enfant : à peu près 8 minutes
+let CH = null;
+
+function coachPrompt(kid){
+  const v = DATA[kid];
+  return `You are "Coach Ben", a warm, patient English conversation partner for ${v.name}, a child in ${v.year} at a British school in Morocco. ${v.name}'s first language is French.
+
+HOW YOU TALK
+- Use very simple English. One to three short sentences per reply. Common words only.
+- ALWAYS end your reply with one easy question, so the child keeps talking.
+- Be encouraging and specific ("Nice, I like football too!"), never a teacher's lecture.
+- If the child answers in French, accept it kindly, give the English words, and ask again in English.
+- If the child's English has a mistake, do NOT scold. Repeat their idea correctly inside your reply, and add the FIX line.
+- Never ask for personal data: no address, no school name, no phone, no photos, no last name, no meeting anyone.
+- Topics only: school subjects, food, animals, sports, games, family life in general, holidays, weather, hobbies, dreams, favourite things, daily routine.
+- If the child raises anything upsetting or unsafe, answer gently in one line and say to talk to their parents, then go back to an easy topic.
+
+FORMAT — exactly these lines, nothing else, no markdown:
+EN: <your reply in simple English, ending with a question>
+FR: <the French translation of your EN line>
+FIX: <only if the child made an English mistake: their sentence written correctly. Otherwise omit this line completely.>`;
+}
+function parseCoach(txt){
+  const g = re => { const m = txt.match(re); return m ? m[1].trim() : ''; };
+  let en = g(/^\s*EN\s*:\s*([\s\S]*?)(?:\n\s*(?:FR|FIX)\s*:|$)/m);
+  const fr  = g(/^\s*FR\s*:\s*([\s\S]*?)(?:\n\s*(?:EN|FIX)\s*:|$)/m);
+  const fix = g(/^\s*FIX\s*:\s*([\s\S]*?)(?:\n\s*(?:EN|FR)\s*:|$)/m);
+  if(!en) en = txt.replace(/^(FR|FIX)\s*:.*$/gm,'').trim().split('\n')[0] || txt.trim();
+  return { en, fr, fix };
+}
+const chatToday = kid => (CHAT[kid]||[]).find(c => c.d === todayKey());
+async function saveChat(kid){
+  CHAT[kid] = (CHAT[kid]||[]).slice(-7);        // on garde une semaine
+  await store.set(K.chat(kid), CHAT[kid]);
+  await pushNow('conversation de '+kid);
+}
+
+async function chatView(kid){
+  const v = DATA[kid];
+  loadAI();
+  if(!aiPret()){
+    app.innerHTML = `
+    <div class="bar"><button class="back" id="bk">← ${T("Menu","Menu")}</button>
+      <span class="who" style="background:${v.hex}">${T("English chat","Parler anglais")}</span></div>
+    <div class="card" style="padding:18px;">
+      <div style="font-size:34px; text-align:center;">💬</div>
+      <h3 style="font-size:17px; text-align:center;">Le coach n'est pas encore branché</h3>
+      <p style="font-size:13.5px; color:var(--ink-soft)">Pour parler anglais, l'app a besoin de la clé IA.
+      Maman ou papa doit aller dans <b>Espace parent → Assistant IA</b>, saisir la clé et cocher
+      <b>« Autoriser la conversation sur la tablette »</b>.</p>
+      <button class="cta ghost" id="bk2">${T("Back","Retour")}</button>
+    </div>`;
+    document.getElementById('bk').onclick = ()=>menu(kid);
+    document.getElementById('bk2').onclick = ()=>menu(kid);
+    return;
+  }
+  let sess = chatToday(kid);
+  if(!sess){ sess = { d: todayKey(), turns: [], fini:false }; CHAT[kid] = (CHAT[kid]||[]).concat([sess]); }
+  CH = { kid, sess, attente:false, rec:null, ecoute:false };
+  chatDraw();
+  if(!sess.turns.length) coachParle("(the child just opened the app, greet them and ask an easy question)");
+}
+const chatNb = () => CH.sess.turns.filter(t => t.r === 'me').length;
+
+function chatDraw(){
+  const kid = CH.kid, v = DATA[kid], sess = CH.sess, n = chatNb();
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← ${T("Menu","Menu")}</button>
+    <span class="who" style="background:${v.hex}">💬 ${T("English chat","Parler anglais")} · ${n}/${CHAT_MAX}</span></div>
+  <div class="prog"><i style="width:${Math.round(100*Math.min(1,n/CHAT_MAX))}%; background:${v.hex}"></i></div>
+
+  <div class="card" style="padding:14px;">
+    <div id="flux" style="max-height:52vh; overflow:auto; display:flex; flex-direction:column;">
+      ${sess.turns.map((t,i)=>`<div class="bub2 ${t.r==='me'?'me':'ai'}" data-b="${i}">
+        <div>${t.r==='me'?'':'<b>Coach Ben</b> '}${(t.en||'').replace(/</g,'&lt;')}</div>
+        ${t.fix?`<div style="font-size:12.5px; color:#B45309; margin-top:4px;">✏️ Better: <b>${t.fix.replace(/</g,'&lt;')}</b></div>`:''}
+        ${t.fr?`<div class="tr">${t.fr.replace(/</g,'&lt;')}</div>`:''}
+        ${t.r==='ai'?`<div style="margin-top:6px; display:flex; gap:6px;">
+           <button class="tool" data-say="${i}" style="padding:4px 9px; font-size:12px;">🔊</button>
+           ${t.fr?`<button class="tool" data-tr="${i}" style="padding:4px 9px; font-size:12px;">${T("French","Français")}</button>`:''}
+         </div>`:''}
+      </div>`).join('')}
+      ${CH.attente?`<div class="bub2 ai" style="opacity:.6">Coach Ben écrit…</div>`:''}
+    </div>
+
+    ${sess.fini || n >= CHAT_MAX
+      ? `<div class="fb ok" style="margin-top:12px;"><span class="mark">${tick()}</span><span>
+          <h3>${T("Session finished!","Session terminée !")}</h3>
+          <p>${T("You spoke English today. Come back tomorrow!","Tu as parlé anglais aujourd'hui. Reviens demain !")}</p></span></div>
+         <button class="cta ghost" id="home3" style="margin-top:10px;">${T("Back to menu","Retour au menu")}</button>`
+      : `<div style="margin-top:12px; display:flex; gap:8px; align-items:flex-end;">
+          <input id="say" placeholder="Write in English… · en anglais"
+            style="flex:1; padding:13px; border:3px solid #E3D9C8; border-radius:14px; font-size:17px; font-family:inherit;">
+          <button class="tool on" id="send" style="padding:13px 15px; font-size:17px;">➤</button>
+        </div>
+        ${micOK?`<button class="mic" id="mic" style="background:${v.hex}">🎤 Or speak · Ou parle au micro</button>`:''}
+        <div id="cerr"></div>
+        <button class="tool" id="stop" style="margin-top:10px;">${T("Finish the session","Terminer la session")}</button>`}
+  </div>
+  <p class="foot">${T("Coach Ben speaks simple English and always asks you a question.","Coach Ben parle anglais simplement et te pose toujours une question.")}</p>`;
+
+  const fx = document.getElementById('flux'); if(fx) fx.scrollTop = fx.scrollHeight;
+  document.getElementById('bk').onclick = ()=>{ if(CH.rec) try{CH.rec.abort();}catch(e){} menu(kid); };
+  const h3 = document.getElementById('home3'); if(h3) h3.onclick = ()=>menu(kid);
+  document.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>say(sess.turns[+b.dataset.say].en, 'en-GB'));
+  document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>
+    document.querySelector('[data-b="'+b.dataset.tr+'"]').classList.toggle('open'));
+  const inp = document.getElementById('say');
+  const envoie = ()=>{ const t = (inp.value||'').trim(); if(!t) return; inp.value=''; chatEnvoi(t); };
+  if(inp){ inp.onkeydown = e => { if(e.key === 'Enter') envoie(); }; setTimeout(()=>{ try{inp.focus();}catch(e){} }, 60); }
+  const sd = document.getElementById('send'); if(sd) sd.onclick = envoie;
+  const st = document.getElementById('stop'); if(st) st.onclick = chatFin;
+  const mc = document.getElementById('mic');
+  if(mc) mc.onclick = ()=>{
+    if(CH.ecoute){ try{ CH.rec.stop(); }catch(e){} return; }
+    CH.ecoute = true; mc.classList.add('rec'); mc.textContent = "🎤 I am listening… · Je t'écoute, appuie pour arrêter";
+    CH.rec = ecoute('en-GB',
+      alts => { CH.ecoute = false; chatEnvoi(alts[0]); },
+      () => { CH.ecoute = false; const m = document.getElementById('mic');
+              if(m){ m.classList.remove('rec'); m.textContent = '🎤 Or speak · Ou parle au micro'; } },
+      err => { CH.ecoute = false;
+        const e2 = document.getElementById('cerr');
+        if(e2) e2.innerHTML = `<p style="font-size:13px; color:var(--red); margin-top:8px;">${
+          err==='not-allowed' ? "Le micro est refusé. Autorise-le dans les réglages du navigateur."
+          : err==='no-speech' ? "Je n'ai rien entendu, réessaie."
+          : "Le micro n'a pas marché. Tu peux écrire à la place."}</p>`;
+        const m = document.getElementById('mic');
+        if(m){ m.classList.remove('rec'); m.textContent = '🎤 Or speak · Ou parle au micro'; } });
+  };
+}
+async function chatEnvoi(txt){
+  if(CH.attente) return;
+  CH.sess.turns.push({ r:'me', en: txt });
+  chatDraw();
+  await saveChat(CH.kid);
+  await coachParle(txt);
+}
+async function coachParle(dernier){
+  CH.attente = true; chatDraw();
+  const msgs = [];
+  CH.sess.turns.forEach(t => {
+    if(t.r === 'me') msgs.push({ role:'user', content: t.en });
+    else msgs.push({ role:'assistant', content: 'EN: ' + t.en + (t.fr?'\nFR: '+t.fr:'') });
+  });
+  if(!msgs.length || msgs[msgs.length-1].role !== 'user')
+    msgs.push({ role:'user', content: dernier || '(say hello and ask a question)' });
+  try{
+    const out = await askAIChat(coachPrompt(CH.kid), msgs, 400);
+    const r = parseCoach(out);
+    CH.sess.turns.push({ r:'ai', en:r.en, fr:r.fr, fix:r.fix });
+    CH.attente = false;
+    if(chatNb() >= CHAT_MAX) return chatFin();
+    chatDraw();
+    await saveChat(CH.kid);
+    say(r.en, 'en-GB');
+  }catch(e){
+    CH.attente = false; chatDraw();
+    const el = document.getElementById('cerr');
+    if(el) el.innerHTML = `<p style="font-size:13px; color:var(--red); margin-top:8px;">
+      Le coach n'a pas répondu (${String(e.message||e).slice(0,90)}). Réessaie dans un instant.</p>`;
+  }
+}
+async function chatFin(){
+  const kid = CH.kid, n = chatNb();
+  CH.sess.fini = true;
+  await saveChat(kid);
+  if(n >= 3){
+    await saveResult(kid, 'chat-en', "Conversation en anglais", Math.min(n, 6), 6, [], []);
+    await checkDailyReward(kid);
+  }
+  chatDraw();
+}
+
+/* ---------------- lire à voix haute, et vérifier ---------------- */
+let RD = null;
+function readingView(st){
+  RD = { st, i:0, res:[], rec:null, ecoute:false };
+  readingStep();
+}
+function readingStep(){
+  const kid = S.kid, v = DATA[kid], st = RD.st;
+  if(RD.i >= st.qs.length) return readingDone();
+  const L = st.qs[RD.i];
+  const r = RD.res[RD.i];
+  const mots = r ? L.en.split(/\s+/).map((w,i)=>`<span class="${r.ok[i]?'good':'bad'}">${w}</span>`).join(' ')
+                 : L.en;
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← ${T("Chapters","Chapitres")}</button>
+    <span class="who" style="background:${v.hex}">${T(st.title, st.titleFr)}</span></div>
+  <div class="prog"><i style="width:${Math.round(100*RD.i/st.qs.length)}%; background:${v.hex}"></i></div>
+
+  <div class="card" style="padding:22px 18px;">
+    <div class="qmeta">${T("Sentence","Phrase")} ${RD.i+1} / ${st.qs.length}</div>
+    <div class="phrase">${mots}</div>
+    ${L.fr?`<p style="text-align:center; margin-top:8px;" class="fr">${L.fr}</p>`:''}
+    <div style="display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap;">
+      <button class="speak" id="mod">🔊 ${T("Listen first","Écouter d'abord")}</button>
+      <button class="tool" id="skip">${T("Skip","Passer")}</button>
+    </div>
+    <div id="fb2"></div>
+    ${micOK
+      ? `<button class="mic" id="go" style="background:${v.hex}">🎤 ${r?'Read again · Relire':'Read it aloud · Lis la phrase à voix haute'}</button>`
+      : `<div class="fb no" style="margin-top:14px;"><span class="mark">${cross()}</span><span>
+           <h3>${T("No microphone here","Pas de micro ici")}</h3>
+           <p>Ce navigateur ne sait pas écouter. Sur iPad, utilise <b>Safari</b> ou <b>Chrome</b> et accepte le micro.
+           Tu peux quand même lire la phrase à voix haute, puis appuyer sur « Je l'ai lue ».</p></span></div>
+         <button class="mic" id="selfok" style="background:${v.hex}">${T("I read it","Je l'ai lue")}</button>`}
+    ${r ? `<button class="cta ghost" id="next" style="margin-top:10px;">${
+        RD.i+1 < st.qs.length ? T("Next sentence","Phrase suivante") : T("See my result","Voir mon résultat")}</button>` : ''}
+  </div>`;
+
+  document.getElementById('bk').onclick = ()=>{ if(RD.rec) try{RD.rec.abort();}catch(e){} menu(kid); };
+  document.getElementById('mod').onclick = ()=>say(L.en, 'en-GB', m=>{
+    document.getElementById('fb2').innerHTML = `<p style="font-size:12.5px; color:var(--red); margin-top:8px;">${m}</p>`; });
+  document.getElementById('skip').onclick = ()=>{ RD.res[RD.i] = RD.res[RD.i] || { pct:0, ok:L.en.split(/\s+/).map(()=>false), passe:true }; RD.i++; readingStep(); };
+  const nx = document.getElementById('next'); if(nx) nx.onclick = ()=>{ RD.i++; readingStep(); };
+  const self = document.getElementById('selfok');
+  if(self) self.onclick = ()=>{ RD.res[RD.i] = { pct:100, ok:L.en.split(/\s+/).map(()=>true), sansmic:true }; RD.i++; readingStep(); };
+
+  const go = document.getElementById('go');
+  if(go) go.onclick = ()=>{
+    if(RD.ecoute){ try{ RD.rec.stop(); }catch(e){} return; }
+    RD.ecoute = true; go.classList.add('rec'); go.textContent = "🎤 I am listening… · Je t'écoute, appuie pour arrêter";
+    document.getElementById('fb2').innerHTML = '';
+    RD.rec = ecoute('en-GB',
+      alts => {
+        const best = meilleureLecture(L.en, alts);
+        RD.res[RD.i] = best;
+        RD.ecoute = false;
+        readingStep();
+        const bon = best.pct >= 75;
+        document.getElementById('fb2').innerHTML = `<div class="fb ${bon?'ok':'no'}" style="margin-top:12px;">
+          <span class="mark">${bon?tick():cross()}</span><span>
+          <h3>${bon ? T("Great reading!","Très bien lu !") : T("Almost — try again","Presque, réessaie")} ${best.pct}%</h3>
+          <p>${bon ? T("The words in green were clear.","Les mots en vert ont été bien compris.")
+                   : T("Say the red words more slowly and clearly.","Redis les mots en rouge plus lentement, en détachant bien.")}</p>
+          <p style="font-size:12px; color:var(--ink-soft)">${T("Heard:","Entendu :")} « ${(best.dit||'').replace(/</g,'&lt;')} »</p></span></div>`;
+      },
+      () => { RD.ecoute = false; const g = document.getElementById('go');
+              if(g){ g.classList.remove('rec'); g.textContent = '🎤 Read it aloud · Lis la phrase à voix haute'; } },
+      err => { RD.ecoute = false;
+        const f = document.getElementById('fb2');
+        if(f) f.innerHTML = `<p style="font-size:13px; color:var(--red); margin-top:10px;">${
+          err==='not-allowed' ? "Le micro est refusé. Autorise-le dans les réglages du navigateur."
+          : err==='no-speech' ? "Je n'ai rien entendu. Approche-toi et réessaie."
+          : err==='nomic' ? "Ce navigateur ne sait pas écouter."
+          : "Le micro n'a pas marché (" + err + "). Réessaie."}</p>`;
+        const g = document.getElementById('go');
+        if(g){ g.classList.remove('rec'); g.textContent = '🎤 Read it aloud · Lis la phrase à voix haute'; } });
+  };
+}
+async function readingDone(){
+  const kid = S.kid, v = DATA[kid], st = RD.st;
+  const tot = st.qs.length;
+  const bons = RD.res.filter(r => r && r.pct >= 75).length;
+  // les mots qui ont le plus résisté
+  const rates = {};
+  RD.res.forEach((r,i) => { if(!r || r.sansmic) return;
+    st.qs[i].en.split(/\s+/).forEach((w,j) => { if(!r.ok[j]){ const m = motNu(w); if(m.length>2) rates[m] = (rates[m]||0)+1; } }); });
+  const durs = Object.entries(rates).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]);
+  await saveResult(kid, st.id, (st.titleFr||st.title), bons, tot, durs, []);
+  const gagne = await checkDailyReward(kid);
+  const pc = Math.round(100*bons/tot);
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← ${T("Chapters","Chapitres")}</button>
+    <span class="who" style="background:${v.hex}">${T(st.title, st.titleFr)}</span></div>
+  ${gagne?`<div class="card" style="padding:16px; text-align:center; border-color:#E08A00; background:#FFFBEB; margin-bottom:14px;">
+    <div style="font-size:30px;">🎉💰</div><div style="font-family:'Baloo 2',sans-serif; font-size:20px; color:#B45309;">
+    ${T("Reward earned!","Récompense gagnée !")} +${money(REWARD.amount)}</div></div>`:''}
+  <div class="card result">
+    <div class="circle"><span class="big">${bons}/${tot}</span></div>
+    <h2>${pc>=80?T("Excellent reading!","Excellente lecture !"):pc>=50?T("Good job!","Bien joué !"):T("Keep practising","On continue à s'entraîner")}</h2>
+    <p>${T("Sentences read clearly.","Phrases lues de façon claire.")}</p>
+    ${durs.length?`<div class="card" style="padding:12px; margin-top:14px; text-align:left; border-color:var(--amber); background:#FFFBEB;">
+      <b style="font-size:14px; color:#B45309;">${T("Words to practise","Les mots à retravailler")}</b>
+      <div style="font-size:15px; margin-top:4px;">${durs.join(' · ')}</div>
+      <button class="tool" id="sayd" style="margin-top:8px;">🔊 ${T("Listen to them","Les écouter")}</button></div>`:''}
+    <button class="cta" id="again" style="background:${v.hex}; margin-top:14px;">${T("Read it again","Relire ce texte")}</button>
+    <button class="cta ghost" id="home2">${T("Back to chapters","Retour aux chapitres")}</button>
+  </div>
+  <p class="foot">${T("The app checks that your words are understood, not your accent.","L'app vérifie que tes mots sont bien compris — pas ton accent.")}</p>`;
+  document.getElementById('bk').onclick = ()=>menu(kid);
+  document.getElementById('home2').onclick = ()=>menu(kid);
+  document.getElementById('again').onclick = ()=>readingView(st);
+  const sd = document.getElementById('sayd'); if(sd) sd.onclick = ()=>say(durs.join(', '), 'en-GB');
+}
+
 /* la liste des chapitres d'une matière */
 function subjectView(kid, i, subs){
   const v = DATA[kid], su = subs[i];
@@ -1513,6 +2155,14 @@ function subjectView(kid, i, subs){
     <span class="who" style="background:${v.hex}">${su.name}</span>
   </div>
   <div class="subject"><h2>${su.name}</h2><span>${T(su.note||'', su.noteFr||'')}</span></div>
+  ${(()=>{ const rec = su.sets.filter(x => addedOf(x) && (Date.now()-addedOf(x)) < 12*864e5)
+                              .sort((a,b)=>addedOf(b)-addedOf(a));
+     return rec.length ? `<div class="card" style="padding:12px 14px; margin-bottom:12px; border-color:var(--amber); background:#FFFBEB;">
+       <b style="color:#B45309; font-size:14.5px;">✨ ${T("Added recently","Ajoutés récemment")}</b>
+       ${rec.map(x=>`<div style="font-size:13.5px; margin-top:4px;">
+          ${progress[x.id]?'✅':'•'} ${T(x.title, x.titleFr)}
+          <span style="color:var(--ink-soft)"> — ${frDate(new Date(addedOf(x)).toISOString())}</span></div>`).join('')}
+     </div>` : ''; })()}
   ${su.sets.map((st,n)=>{
       const p = progress[st.id];
       const pct = p ? Math.round(100*p.best/p.total) : 0;
@@ -1534,7 +2184,7 @@ function subjectView(kid, i, subs){
       return `<button class="card chap" data-set="${st.id}">
         <span class="n" style="background:${v.hex}">${n+1}</span>
         <span class="t"><b>${T(st.title, st.titleFr)}${st.custom && !p ? '<span class="newbadge">✨ à faire</span>' : ''}</b>
-          <small>${T(st.sub, st.subFr)}${st.learn ? '' : ' · '+st.qs.length+' questions'}</small></span>
+          <small>${T(st.sub, st.subFr)}${st.learn ? '' : ' · '+st.qs.length+(st.reading?' phrases à lire':' questions')}${addedOf(st)?` · ${T("added","ajouté le")} ${frDate(new Date(addedOf(st)).toISOString())}`:''}</small></span>
         <span class="stars">${[0,1,2].map(x=>`<span class="${x<stars?'on':''}">★</span>`).join('')}</span>
         ${p?`<span class="score">${p.best}/${p.total}</span>`:''}
       </button>`;}).join('')}
@@ -1543,7 +2193,9 @@ function subjectView(kid, i, subs){
   document.getElementById('bk').onclick = ()=>menu(kid);
   document.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{
     const st = findSet(b.dataset.set);
-    if(st && st.learn) alphabet(); else startSet(b.dataset.set);
+    if(st && st.learn) alphabet();
+    else if(st && st.reading) readingView(st);
+    else startSet(b.dataset.set);
   });
 }
 
@@ -1554,7 +2206,7 @@ function findSet(id){
 
 function startSet(id){
   const st = findSet(id);
-  S.set = st.daily ? Object.assign({}, st, { qs: chooseDaily(st, st.perDay || 12) }) : st;
+  S.set = Object.assign({}, st, { qs: st.daily ? chooseDaily(st, st.perDay || 12) : pickForSet(st) });
   S.i=0; S.score=0; S.tries=0; S.picked=null; S.log=[];
   question();
 }
@@ -1789,7 +2441,9 @@ function pencil(){ return `<svg viewBox="0 0 40 40" width="40"><path d="M8 32 L1
 
 /* ---------------- correction ---------------- */
 const norm = s => (s||'').toString().trim().replace(/[’‘`]/g,"'").replace(/[−–—]/g,'-').replace(/\s+/g,' ');
-const bare = s => norm(s).toLowerCase().replace(/[.,!?;:"']/g,'').replace(/\s+/g,' ').trim();
+const bare = s => norm(s).toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'')   // é = e, à = a (les harakat arabes ne sont pas touchées)
+  .replace(/[.,!?;:"']/g,'').replace(/\s+/g,' ').trim();
 function numVal(s){ return parseFloat(norm(s).replace(/\s/g,'').replace(',','.')); }
 
 function judge(q, given){
@@ -1878,7 +2532,7 @@ async function check(){
     if(!s1.value.trim()){ tip(T("Write step 1 first — or tap « I can do it in my head ».","Écris d'abord l'étape 1 — ou appuie sur « Je calcule de tête ».")); setActive(s1); return; }
     const rs = judgeStep(q.step, s1.value);
     if(!rs.ok){
-      if(q._k) srsUpdate(q._k, false);
+      if(q._k){ srsUpdate(q._k, false); markAsked(q._k, false); }
       S.log.push({q:q.q, ok:false, a:'étape 1 : '+s1.value, c:solutionOf(q)});
       if(q.t==='choice') markChoices(q);
       lockAndShow(q, wrongCard(q, T("Step 1 is wrong.","L'étape 1 est fausse."),
@@ -1903,7 +2557,7 @@ async function check(){
   if(q.t==='choice') markChoices(q);
 
   const typed = (q.t==='choice') ? (S.picked!=null ? q.c[S.picked] : '') : given;
-  if(q._k) srsUpdate(q._k, res.ok);
+  if(q._k){ srsUpdate(q._k, res.ok); markAsked(q._k, res.ok); }
   if(res.ok){
     S.score += 1;
     S.log.push({q:q.q, ok:true, a:typed, c:solutionOf(q)});
@@ -1943,6 +2597,7 @@ async function results(){
   const pct = score/total;
   const strip = t => (t||'').toString().replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
   if(st.daily) await store.set(K.srs(S.kid), SRS);
+  await store.set(K.asked(S.kid), ASKED);        // mémoire : ne pas reposer les mêmes questions
   let prime = 0, primeDeja = false;
   if(st.exam){
     const p100 = Math.round(100*score/total);
@@ -1996,7 +2651,7 @@ async function results(){
 }
 
 /* ============================================================ ESPACE PARENT */
-const VERSION = 'v31 · progression quotidienne corrigée';
+const VERSION = 'v34 · devoirs, lecture à voix haute, Coach Ben';
 const KIDS = ['lina','ilyes'];
 const dayKey = d => { const z=new Date(d); return new Date(z.getTime()-z.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 const frDate = iso => new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
@@ -2087,6 +2742,9 @@ async function parents(){
       </details>
 
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+        <button class="tool" data-bilan="${kid}" style="border-color:var(--green); color:var(--green)">📊 Bilan clair</button>
+        <button class="tool" data-hw="${kid}" style="border-color:#4F46E5; color:#3730A3">📚 Devoirs${(HW[kid]||[]).filter(h=>h.status==='pending').length?' · '+(HW[kid]||[]).filter(h=>h.status==='pending').length+' à valider':''}</button>
+        <button class="tool" data-chatlog="${kid}" style="border-color:#0E7490; color:#0E7490">💬 Conversations${(CHAT[kid]||[]).length?' · '+(CHAT[kid]||[]).length:''}</button>
         <button class="tool" data-money="${kid}" style="border-color:#E08A00; color:#B45309">💰 Cagnotte et tâches${(TASKS[kid]||[]).filter(t=>t.status==='pending').length?' · '+(TASKS[kid]||[]).filter(t=>t.status==='pending').length+' à valider':''}</button>
         <button class="tool" data-add="${kid}" style="border-color:${v.hex}; color:${v.hex}">➕ Écrire un chapitre</button>
         <button class="tool" data-imp="${kid}" style="border-color:${v.hex}; color:${v.hex}">📥 Importer un chapitre</button>
@@ -2245,6 +2903,9 @@ async function parents(){
   document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>editor(b.dataset.add));
   document.querySelectorAll('[data-imp]').forEach(b=>b.onclick=()=>importer(b.dataset.imp));
   document.querySelectorAll('[data-money]').forEach(b=>b.onclick=()=>moneyView(b.dataset.money));
+  document.querySelectorAll('[data-bilan]').forEach(b=>b.onclick=()=>bilanView(b.dataset.bilan));
+  document.querySelectorAll('[data-hw]').forEach(b=>b.onclick=()=>hwView(b.dataset.hw));
+  document.querySelectorAll('[data-chatlog]').forEach(b=>b.onclick=()=>chatLogView(b.dataset.chatlog));
   document.querySelectorAll('[data-ai]').forEach(b=>b.onclick=()=>aiView(b.dataset.ai));
   document.querySelectorAll('[data-sess]').forEach(b=>b.onclick=()=>{
     const [kid, ts] = b.dataset.sess.split('|'); session(kid, +ts);
@@ -2305,9 +2966,14 @@ async function aiView(kid){
     <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;">Elle reste sur cet appareil et n'est jamais envoyée au serveur de synchronisation. Utilise une clé dédiée, avec un plafond de dépense.</p>
     <div class="field"><label>Fournisseur</label>
       <select id="ai-p"><option value="claude">Claude (Anthropic)</option><option value="openai">ChatGPT (OpenAI)</option></select></div>
-    <div class="field"><label>Clé API</label><input id="ai-k" value="${AI.key||''}" placeholder="sk-..."></div>
+    <div class="field"><label>Clé API</label><input id="ai-k" value="${AI.key||(AISHARED&&AISHARED.key)||''}" placeholder="sk-..."></div>
     <div class="field"><label>Modèle (facultatif)</label><input id="ai-m" value="${AI.model||''}" placeholder="${AI_DEFAULT[AI.provider||'claude']}"></div>
     <button class="tool on" id="ai-save">Enregistrer</button>
+    <label style="display:flex; gap:9px; align-items:flex-start; margin-top:12px; font-size:13px; cursor:pointer;">
+      <input type="checkbox" id="ai-sh" ${AISHARED && AISHARED.key ? 'checked' : ''} style="width:20px; height:20px; margin-top:1px;">
+      <span><b>Autoriser la conversation sur la tablette des enfants</b><br>
+      <span style="color:var(--ink-soft)">Nécessaire pour « Parler anglais » : la clé est alors copiée sur le serveur de synchronisation pour que la tablette puisse l'utiliser. À n'activer qu'avec une clé dédiée et un plafond de dépense.</span></span>
+    </label>
   </div>
 
   <div class="card" style="padding:16px; margin-top:14px; border-color:#7C3AED;">
@@ -2331,11 +2997,18 @@ async function aiView(kid){
 
   document.getElementById('bk').onclick = parents;
   document.getElementById('ai-p').value = AI.provider || 'claude';
-  document.getElementById('ai-save').onclick = ()=>{
-    saveAI({ provider: document.getElementById('ai-p').value,
-             key: document.getElementById('ai-k').value.trim(),
-             model: document.getElementById('ai-m').value.trim() });
-    alert("Enregistré sur cet appareil.");
+  document.getElementById('ai-save').onclick = async ()=>{
+    const o = { provider: document.getElementById('ai-p').value,
+                key: document.getElementById('ai-k').value.trim(),
+                model: document.getElementById('ai-m').value.trim() };
+    saveAI(o);
+    if(document.getElementById('ai-sh').checked && o.key){
+      AISHARED = o; await store.set(K.aikey(), o); await pushNow('clé IA partagée');
+      alert("Enregistré. La conversation est maintenant possible sur la tablette.");
+    } else {
+      if(AISHARED){ AISHARED = null; await store.set(K.aikey(), null); await pushNow('clé IA retirée'); }
+      alert("Enregistré sur cet appareil seulement.");
+    }
     aiView(kid);
   };
 
@@ -2387,7 +3060,7 @@ async function aiView(kid){
         <button class="cta" id="g-add" style="background:${v.hex}; margin-top:12px;">Ajouter chez ${v.name}</button>
         <button class="cta ghost" id="g-dl">Télécharger le fichier .json</button></div>`;
       document.getElementById('g-add').onclick = async ()=>{
-        obj.id = 'p-'+Date.now(); obj.custom = true; obj.subject = obj.subject || su;
+        obj.id = 'p-'+Date.now(); obj.custom = true; obj.addedAt = Date.now(); obj.subject = obj.subject || su;
         obj.sub = obj.sub || su;
         CUSTOM[kid].push(obj); await saveCustom(kid);
         alert("Ajouté chez " + v.name + " !"); parents();
@@ -2405,6 +3078,171 @@ async function aiView(kid){
     }
     btn.textContent = "Générer le chapitre";
   };
+}
+
+/* ---------------- les devoirs de l'école, côté parent ---------------- */
+async function hwView(kid){
+  const v = DATA[kid];
+  await pullRemote(true); await loadCustom();
+  const l = hwTries(kid);
+  const chaps = [].concat(...subjectsOf(kid).map(su => su.sets.filter(x=>!x.learn && !x.reading).map(x=>({su:su.name, st:x}))));
+  const dMin = todayKey();
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Espace parent</button>
+    <span class="who" style="background:#4F46E5">Devoirs · ${v.name}</span></div>
+
+  <div class="card" style="padding:16px;">
+    <h3 style="font-size:16px;">Donner un devoir à ${v.name}</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;">Il apparaît tout de suite sur sa tablette, avec la date limite. Il coche « C'est fait », tu valides ici.</p>
+    <div class="field"><label>Le devoir</label><input id="h-t" placeholder="Exercices p. 42, n° 1 à 6"></div>
+    <div class="two">
+      <div class="field"><label>Matière</label>
+        <select id="h-s"><option>Maths</option><option>English</option><option>Science</option><option>العربية — Arabic</option><option>French</option><option>Autre</option></select></div>
+      <div class="field"><label>Pour le</label><input id="h-d" type="date" value="${dMin}"></div>
+    </div>
+    <div class="field"><label>Consigne (facultatif)</label><input id="h-n" placeholder="à rendre lundi, écrire au stylo"></div>
+    <div class="field"><label>Chapitre d'entraînement lié (facultatif)</label>
+      <select id="h-c"><option value="">— aucun —</option>
+        ${chaps.map(c=>`<option value="${c.st.id}">${c.su} · ${c.st.titleFr || c.st.title}</option>`).join('')}</select></div>
+    <button class="cta" id="h-add" style="background:#4F46E5">Ajouter le devoir</button>
+  </div>
+
+  <div class="card" style="padding:16px; margin-top:14px;">
+    <h3 style="font-size:16px;">Les devoirs en cours (${l.filter(h=>h.status!=='done').length})</h3>
+    ${l.length ? l.map(h=>{ const e = hwEtat(h);
+      return `<div class="hwline" style="box-shadow:none; border-color:${e.col}">
+        <span class="ht">${h.status==='done'?'✅ ':''}${h.title}
+          <small>${h.subject||''}${h.due?` · pour le ${frDate(h.due)}`:''}${e.lab?` · <b style="color:${e.col}">${e.lab}</b>`:''}</small>
+          ${h.note?`<small>${h.note}</small>`:''}</span>
+        ${h.status==='pending'?`<button class="hb" data-ok="${h.id}" style="background:var(--green)">Valider</button>
+                                <button class="hb" data-no="${h.id}" style="background:var(--red)">Refuser</button>`:''}
+        <button class="hb" data-del="${h.id}" style="background:var(--ink-soft)">✕</button>
+      </div>`; }).join('')
+      : '<p style="font-size:13.5px; color:var(--ink-soft);">Aucun devoir pour le moment.</p>'}
+  </div>
+  <p class="foot">Astuce : envoie-moi la feuille de devoirs et je te renvoie un fichier à importer — les devoirs et les exercices d'entraînement d'un coup.</p>`;
+
+  document.getElementById('bk').onclick = parents;
+  document.getElementById('h-add').onclick = async ()=>{
+    const title = document.getElementById('h-t').value.trim();
+    if(!title){ alert("Écris le devoir."); return; }
+    HW[kid].push({ id:'h-'+Date.now(), title,
+      subject: document.getElementById('h-s').value,
+      due: document.getElementById('h-d').value,
+      note: document.getElementById('h-n').value.trim(),
+      chapterId: document.getElementById('h-c').value || '',
+      status:'todo', created:Date.now() });
+    await saveHW(kid); hwView(kid);
+  };
+  document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=async ()=>{
+    const h = HW[kid].find(x=>x.id===b.dataset.ok); if(!h) return;
+    h.status='done'; h.validatedAt=Date.now(); await saveHW(kid); hwView(kid);
+  });
+  document.querySelectorAll('[data-no]').forEach(b=>b.onclick=async ()=>{
+    const h = HW[kid].find(x=>x.id===b.dataset.no); if(!h) return;
+    h.status='todo'; delete h.doneAt; await saveHW(kid); hwView(kid);
+  });
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async ()=>{
+    if(!confirm("Supprimer ce devoir ?")) return;
+    HW[kid] = HW[kid].filter(x=>x.id!==b.dataset.del); await saveHW(kid); hwView(kid);
+  });
+}
+
+/* ---------------- le bilan clair, côté parent ---------------- */
+async function bilanView(kid){
+  const v = DATA[kid];
+  await pullRemote(); await loadProgress(kid); await loadCustom(); await loadMoney();
+  const hist = (await store.get(K.hist(kid))) || [];
+  const miss = await missionState(kid);
+  const now = Date.now();
+  const sem = hist.filter(h => now - h.ts < 7*864e5);
+  const jours = new Set(sem.map(h => h.d)).size;
+  const q7 = sem.reduce((a,h)=>a+h.total, 0), s7 = sem.reduce((a,h)=>a+h.score, 0);
+  const pct7 = q7 ? Math.round(100*s7/q7) : 0;
+
+  const etat = st => {
+    if(st.daily){ const d = dailyStats(st); return { fait: d.vus>0, pc: d.pct, txt: d.pct+'% de la liste' }; }
+    const p = progress[st.id];
+    if(!p) return { fait:false, pc:0, txt:'jamais fait' };
+    const pc = Math.round(100*p.best/p.total);
+    return { fait:true, pc, txt: p.best+'/'+p.total+' · '+p.tries+' essai(s)' };
+  };
+  const acquis = [], revoir = [], jamais = [];
+  subjectsOf(kid).forEach(su => su.sets.forEach(st => {
+    if(st.learn) return;
+    const e = etat(st);
+    const row = { su: su.name, st, e };
+    if(!e.fait) jamais.push(row); else if(e.pc >= 70) acquis.push(row); else revoir.push(row);
+  }));
+  revoir.sort((a,b) => a.e.pc - b.e.pc);
+
+  // les erreurs qui reviennent le plus souvent
+  const errs = {};
+  hist.slice(-40).forEach(h => (h.w||[]).forEach(w => {
+    const key = w.trim(); if(!key) return;
+    errs[key] = errs[key] || { n:0, ch:h.title || h.set };
+    errs[key].n++;
+  }));
+  const topErr = Object.entries(errs).sort((a,b) => b[1].n - a[1].n).slice(0, 8);
+
+  // les 7 derniers jours, jour par jour
+  const jj = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const k = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    const hs = hist.filter(h => h.d === k);
+    jj.push({ k, q: hs.reduce((a,h)=>a+h.total,0), s: hs.reduce((a,h)=>a+h.score,0),
+              lab: d.toLocaleDateString('fr-FR',{weekday:'short'}) });
+  }
+  const maxQ = Math.max(8, ...jj.map(x=>x.q));
+
+  const liste = (titre, rows, couleur, detail) => rows.length ? `
+    <div class="card" style="padding:14px 16px; margin-top:12px; border-color:${couleur};">
+      <h3 style="font-size:16px; color:${couleur}; margin:0 0 6px;">${titre} (${rows.length})</h3>
+      ${rows.map(r=>`<div style="display:flex; gap:8px; align-items:baseline; padding:6px 0; border-bottom:1px dotted #DDD8C8; font-size:13.5px;">
+        <span style="flex:1"><b>${r.st.titleFr || r.st.title}</b>
+          <span style="color:var(--ink-soft)"> · ${r.su}</span></span>
+        <b style="color:${couleur}; white-space:nowrap;">${r.e.txt}</b>
+      </div>`).join('')}
+      ${detail||''}
+    </div>` : '';
+
+  app.innerHTML = `
+  <div class="bar"><button class="back" id="bk">← Espace parent</button>
+    <span class="who" style="background:${v.hex}">Bilan · ${v.name}</span></div>
+
+  <div class="card" style="padding:16px;">
+    <h3 style="font-size:17px; margin:0 0 6px;">Cette semaine</h3>
+    <p style="font-size:14px; margin:0;">
+      <b>${jours}</b> jour(s) travaillé(s) · <b>${q7}</b> questions ·
+      réussite <b style="color:${pct7>=70?'var(--green)':pct7>=50?'var(--amber)':'var(--red)'}">${pct7}%</b></p>
+    <div class="bars">
+      ${jj.map(x=>`<div>
+        <small>${x.q?Math.round(100*x.s/x.q)+'%':''}</small>
+        <div class="bar" style="height:${Math.round(100*x.q/maxQ)}%; background:${x.q?v.hex:'#E7E3D6'}"></div>
+        <small>${x.lab}<br>${x.q||''}</small></div>`).join('')}
+    </div>
+    <p style="font-size:12px; color:var(--ink-soft); margin:4px 0 0;">Questions répondues par jour, % de réussite au-dessus.</p>
+  </div>
+
+  <div class="card" style="padding:14px 16px; margin-top:12px; border-color:${miss.allDone?'var(--green)':'#E08A00'}; background:${miss.allDone?'#EAF7EF':'#FFFBEB'};">
+    <h3 style="font-size:16px; color:${miss.allDone?'var(--green)':'#B45309'}; margin:0 0 4px;">
+      🎯 Mission du jour — ${miss.faits}/${miss.nb}</h3>
+    ${miss.tasks.map(t=>`<div style="font-size:13.5px; padding:3px 0;">${t.done?'✅':'⬜'} ${t.fr}</div>`).join('')
+      || '<div style="font-size:13.5px;">Aucune mission : ajoute des chapitres.</div>'}
+  </div>
+
+  ${liste('⚠️ À retravailler en priorité', revoir, 'var(--red)',
+     topErr.length ? `<div style="margin-top:8px;">
+        <b style="font-size:13px;">Les questions qui reviennent le plus souvent :</b>
+        ${topErr.map(([q,o])=>`<div style="font-size:12.5px; color:var(--ink-soft); padding:3px 0;">
+          ✗ ${q} <span style="color:var(--red)">· ${o.n} fois</span> <span>· ${o.ch}</span></div>`).join('')}
+      </div>` : '')}
+  ${liste('✅ Acquis', acquis, 'var(--green)')}
+  ${liste('⚪ Jamais ouverts', jamais, 'var(--ink-soft)')}
+
+  <p class="foot">Acquis = 70 % ou plus au meilleur essai. Un chapitre 🔁 est acquis à 70 % de sa liste.</p>`;
+  document.getElementById('bk').onclick = parents;
 }
 
 /* ---------------- cagnotte et tâches, côté parent ---------------- */
@@ -2574,6 +3412,10 @@ function checkChapter(o){
   if(!o || typeof o!=='object') throw "ce n'est pas un chapitre";
   if(!o.title) throw "il manque le titre (title)";
   if(!Array.isArray(o.qs) || !o.qs.length) throw "il manque les questions (qs)";
+  if(o.reading){
+    o.qs.forEach((l,i)=>{ if(!l || !l.en) throw "il manque le texte anglais de la phrase "+(i+1); });
+    return true;
+  }
   o.qs.forEach((q,i)=>{
     const n = 'question '+(i+1);
     if(!q.q) throw "il manque l'énoncé de la "+n;
@@ -2618,6 +3460,16 @@ function importer(kid){
     let data;
     try{ data = JSON.parse(document.getElementById('js').value); }
     catch(e){ msg.innerHTML = `<div class="fb no"><span class="mark">${cross()}</span><span><h3>Fichier illisible</h3><p>Le texte collé n'est pas du JSON valide.</p></span></div>`; return; }
+    // un fichier peut contenir des devoirs : { "homework": [ ... ] }
+    if(data && !Array.isArray(data) && Array.isArray(data.homework)){
+      const hws = data.homework.map(h => Object.assign(
+        { id:'h-'+Date.now()+'-'+Math.floor(Math.random()*999), status:'todo', created:Date.now() }, h));
+      HW[kid] = (HW[kid]||[]).concat(hws);
+      await saveHW(kid);
+      msg.innerHTML = `<div class="fb ok"><span class="mark">${tick()}</span><span><h3>Devoirs ajoutés !</h3>
+        <p>${hws.length} devoir(s) chez ${v.name}.</p></span></div>`;
+      setTimeout(parents, 1400); return;
+    }
     const list = Array.isArray(data) ? data : [data];
     try{ list.forEach(checkChapter); }
     catch(err){ msg.innerHTML = `<div class="fb no"><span class="mark">${cross()}</span><span><h3>Chapitre incomplet</h3><p>${err}</p></span></div>`; return; }
@@ -2644,7 +3496,8 @@ function importer(kid){
     document.getElementById('confirm').onclick = async ()=>{
       list.forEach(o=>{
         o.id = o.id || ('p-'+Date.now()+'-'+Math.floor(Math.random()*999));
-        o.custom = true; o.subject = o.subject || 'My chapters';
+        o.custom = true; o.addedAt = o.addedAt || Date.now();
+        o.subject = o.subject || 'My chapters';
         o.sub = o.sub || o.subject; o.titleFr = o.titleFr || ''; o.subFr = o.subFr || '';
         CUSTOM[kid].push(o);
       });
@@ -2759,7 +3612,7 @@ function drawEditor(){
     ['subject','title','titleFr','sub','subFr'].forEach(f=>{ E[f] = document.getElementById('f-'+f).value.trim(); });
     if(!E.title){ alert("Donne un titre au chapitre."); return; }
     if(!E.qs.length){ alert("Ajoute au moins une question."); return; }
-    const st = { id:'p-'+Date.now(), custom:true, subject:E.subject,
+    const st = { id:'p-'+Date.now(), custom:true, addedAt:Date.now(), subject:E.subject,
                  title:E.title, titleFr:E.titleFr, sub:E.sub||E.subject, subFr:E.subFr, qs:E.qs };
     CUSTOM[E.kid].push(st); await saveCustom(E.kid);
     const kid = E.kid; E = null;
